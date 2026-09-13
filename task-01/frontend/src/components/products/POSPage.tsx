@@ -66,24 +66,11 @@ export function POSPage() {
 
                 const response = await getProducts()
 
-                if (!cancelled) {
-                    const demoProductIds = new Set([
-                        96,
-                        97,
-                        98,
-                        99,
-                        100,
-                        101,
-                        102,
-                        103,
-                    ])
 
-                    setProducts(
-                        response
-                            .filter((product) => demoProductIds.has(product.id))
-                            .map(mapProduct),
-                    )
+                if (!cancelled) {
+                    setProducts(response.map(mapProduct))
                 }
+
             } catch (requestError) {
                 if (!cancelled) {
                     setError(
@@ -371,22 +358,7 @@ export function POSPage() {
             // Refresh inventory so product cards show current stock.
             const refreshedProducts = await getProducts()
 
-            const demoProductIds = new Set([
-                96,
-                97,
-                98,
-                99,
-                100,
-                101,
-                102,
-                103,
-            ])
-
-            setProducts(
-                refreshedProducts
-                    .filter((product) => demoProductIds.has(product.id))
-                    .map(mapProduct),
-            )
+            setProducts(refreshedProducts.map(mapProduct))
 
             // Start a fresh cart for the next order.
             const newCart = await createCart()
@@ -411,6 +383,7 @@ export function POSPage() {
         (total, item) => total + item.quantity,
         0,
     )
+
 
     return (
         <div className="flex h-[calc(100vh-4rem)] min-h-0">
