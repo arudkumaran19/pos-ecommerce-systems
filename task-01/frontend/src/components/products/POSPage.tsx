@@ -34,8 +34,10 @@ export function POSPage() {
     const [products, setProducts] = useState<Product[]>([])
     const [cartItems, setCartItems] = useState<CartItem[]>([])
     const [cartId, setCartId] = useState<number | null>(null)
+    const [mobileCartOpen, setMobileCartOpen] = useState(false)
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
+
 
     const [checkoutMessage, setCheckoutMessage] =
         useState<string | null>(null)
@@ -387,13 +389,13 @@ export function POSPage() {
 
     return (
         <div className="flex h-[calc(100vh-4rem)] min-h-0">
-            <section className="min-w-0 flex-1 overflow-y-auto p-6">
+            <section className="min-w-0 flex-1 overflow-y-auto p-4 sm:p-6">
                 <div className="mx-auto max-w-7xl">
                     <div className="mb-6">
-                        <div className="mb-1 flex items-center gap-2">
+                        <div className="mb-1 flex items-start gap-2">
                             <PackageSearch className="size-5 text-zinc-700" />
 
-                            <h2 className="text-xl font-semibold tracking-tight text-zinc-950">
+                            <h2 className="text-lg font-semibold tracking-tight text-zinc-950 sm:text-xl">
                                 Product catalog
                             </h2>
                         </div>
@@ -513,6 +515,7 @@ export function POSPage() {
                 </div>
             </section>
 
+            {/* Desktop cart */}
             <aside className="hidden w-[360px] shrink-0 xl:block">
                 <CartPanel
                     items={cartItems}
@@ -523,14 +526,42 @@ export function POSPage() {
                 />
             </aside>
 
-            <div className="fixed bottom-4 right-4 xl:hidden">
+            {/* Mobile cart button */}
+            <div className="fixed bottom-4 right-4 z-40 xl:hidden">
                 <button
                     type="button"
-                    className="rounded-full bg-zinc-950 px-4 py-3 text-sm font-semibold text-white shadow-lg"
+                    onClick={() => setMobileCartOpen(true)}
+                    className="rounded-full bg-zinc-950 px-5 py-3 text-sm font-semibold text-white shadow-lg"
                 >
                     Cart ({cartItemCount})
                 </button>
             </div>
+
+            {/* Mobile cart drawer */}
+            {mobileCartOpen && (
+                <div className="fixed inset-0 z-50 xl:hidden">
+                    <button
+                        type="button"
+                        aria-label="Close cart"
+                        onClick={() => setMobileCartOpen(false)}
+                        className="absolute inset-0 bg-black/40"
+                    />
+
+                    <div className="absolute inset-y-0 right-0 flex w-full max-w-md flex-col bg-white shadow-2xl">
+                        <CartPanel
+                            items={cartItems}
+                            onIncrease={increaseQuantity}
+                            onDecrease={decreaseQuantity}
+                            onRemove={removeFromCart}
+                            onCheckout={() => {
+                                setMobileCartOpen(false)
+                                void handleCheckout()
+                            }}
+                            onClose={() => setMobileCartOpen(false)}
+                        />
+                    </div>
+                </div>
+            )}
             <Toast
                 message={checkoutMessage ?? paymentMessage}
                 variant="success"

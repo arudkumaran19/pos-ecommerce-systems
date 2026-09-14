@@ -1,4 +1,10 @@
-import { Minus, Plus, ShoppingCart, Trash2 } from "lucide-react"
+import {
+    Minus,
+    Plus,
+    ShoppingCart,
+    Trash2,
+    X,
+} from "lucide-react"
 import { Button } from "@/components/ui/button"
 
 export type CartItem = {
@@ -14,6 +20,7 @@ type CartPanelProps = {
     onDecrease?: (productId: number) => void
     onRemove?: (productId: number) => void
     onCheckout?: () => void
+    onClose?: () => void
 }
 
 export function CartPanel({
@@ -22,6 +29,7 @@ export function CartPanel({
                               onDecrease,
                               onRemove,
                               onCheckout,
+                              onClose,
                           }: CartPanelProps) {
     const subtotal = items.reduce(
         (total, item) => total + item.price * item.quantity,
@@ -34,11 +42,12 @@ export function CartPanel({
     )
 
     return (
-        <section className="flex h-full min-h-0 w-full flex-col border-l border-zinc-200 bg-white">
+        <section className="flex h-full min-h-0 w-full flex-col bg-white">
             <div className="flex items-center justify-between border-b border-zinc-200 px-5 py-4">
                 <div>
                     <div className="flex items-center gap-2">
                         <ShoppingCart className="size-4 text-zinc-700" />
+
                         <h2 className="text-sm font-semibold text-zinc-950">
                             Current order
                         </h2>
@@ -49,11 +58,24 @@ export function CartPanel({
                     </p>
                 </div>
 
-                {items.length > 0 && (
-                    <span className="rounded-full bg-zinc-100 px-2 py-1 text-[11px] font-medium text-zinc-600">
-            Draft
-          </span>
-                )}
+                <div className="flex items-center gap-2">
+                    {items.length > 0 && (
+                        <span className="rounded-full bg-zinc-100 px-2 py-1 text-[11px] font-medium text-zinc-600">
+                            Draft
+                        </span>
+                    )}
+
+                    {onClose && (
+                        <button
+                            type="button"
+                            aria-label="Close cart"
+                            onClick={onClose}
+                            className="flex size-8 items-center justify-center rounded-lg text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-zinc-950"
+                        >
+                            <X className="size-4" />
+                        </button>
+                    )}
+                </div>
             </div>
 
             {items.length === 0 ? (
@@ -93,7 +115,9 @@ export function CartPanel({
                                         <button
                                             type="button"
                                             aria-label={`Remove ${item.name}`}
-                                            onClick={() => onRemove?.(item.id)}
+                                            onClick={() =>
+                                                onRemove?.(item.id)
+                                            }
                                             className="flex size-7 shrink-0 items-center justify-center rounded-lg text-zinc-400 transition-colors hover:bg-red-50 hover:text-red-600"
                                         >
                                             <Trash2 className="size-3.5" />
@@ -105,20 +129,24 @@ export function CartPanel({
                                             <button
                                                 type="button"
                                                 aria-label={`Decrease ${item.name} quantity`}
-                                                onClick={() => onDecrease?.(item.id)}
+                                                onClick={() =>
+                                                    onDecrease?.(item.id)
+                                                }
                                                 className="flex size-8 items-center justify-center text-zinc-500 transition-colors hover:bg-zinc-50 hover:text-zinc-950"
                                             >
                                                 <Minus className="size-3.5" />
                                             </button>
 
                                             <span className="flex min-w-8 justify-center text-xs font-semibold text-zinc-900">
-                        {item.quantity}
-                      </span>
+                                                {item.quantity}
+                                            </span>
 
                                             <button
                                                 type="button"
                                                 aria-label={`Increase ${item.name} quantity`}
-                                                onClick={() => onIncrease?.(item.id)}
+                                                onClick={() =>
+                                                    onIncrease?.(item.id)
+                                                }
                                                 className="flex size-8 items-center justify-center text-zinc-500 transition-colors hover:bg-zinc-50 hover:text-zinc-950"
                                             >
                                                 <Plus className="size-3.5" />
@@ -126,7 +154,11 @@ export function CartPanel({
                                         </div>
 
                                         <p className="text-sm font-semibold text-zinc-950">
-                                            ${(item.price * item.quantity).toFixed(2)}
+                                            $
+                                            {(
+                                                item.price *
+                                                item.quantity
+                                            ).toFixed(2)}
                                         </p>
                                     </div>
                                 </div>
@@ -137,17 +169,23 @@ export function CartPanel({
                     <div className="border-t border-zinc-200 bg-zinc-50/80 p-5">
                         <div className="space-y-2">
                             <div className="flex items-center justify-between text-sm">
-                                <span className="text-zinc-500">Subtotal</span>
+                                <span className="text-zinc-500">
+                                    Subtotal
+                                </span>
+
                                 <span className="font-medium text-zinc-900">
-                  ${subtotal.toFixed(2)}
-                </span>
+                                    ${subtotal.toFixed(2)}
+                                </span>
                             </div>
 
                             <div className="flex items-center justify-between text-base font-semibold">
-                                <span className="text-zinc-950">Total</span>
                                 <span className="text-zinc-950">
-                  ${subtotal.toFixed(2)}
-                </span>
+                                    Total
+                                </span>
+
+                                <span className="text-zinc-950">
+                                    ${subtotal.toFixed(2)}
+                                </span>
                             </div>
                         </div>
 
