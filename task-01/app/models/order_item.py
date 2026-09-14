@@ -1,7 +1,7 @@
 from decimal import Decimal
 
-from sqlalchemy import CheckConstraint, ForeignKey, Numeric, UniqueConstraint
-from sqlalchemy.orm import Mapped, mapped_column,relationship
+from sqlalchemy import CheckConstraint, ForeignKey, Numeric, String, UniqueConstraint
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
 
@@ -34,6 +34,11 @@ class OrderItem(Base):
 
     product_id: Mapped[int] = mapped_column(
         ForeignKey("products.id"),
+        nullable=False,
+    )
+
+    product_name: Mapped[str] = mapped_column(
+        String(255),
         nullable=False,
     )
 

@@ -25,7 +25,7 @@ export function AppShell({
     }
 
     return (
-        <div className="flex h-screen overflow-hidden bg-zinc-100">
+        <div className="flex h-screen overflow-hidden bg-[#f8fafc]">
             {/* Desktop sidebar */}
             <div className="hidden xl:block">
                 <Sidebar

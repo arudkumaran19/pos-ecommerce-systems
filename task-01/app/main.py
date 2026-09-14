@@ -84,9 +84,6 @@ app.add_middleware(
 
 
 app.include_router(products_router)
-
-
-app.include_router(products_router)
 app.include_router(carts_router)
 app.include_router(payments_router)
 app.include_router(orders_router)

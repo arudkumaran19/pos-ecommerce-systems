@@ -54,6 +54,12 @@ class CartService:
                 detail="Product not found",
             )
 
+        if not product.is_active:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Product is no longer active",
+            )
+
         existing_item = self.cart_repository.get_item(
             cart_id=cart_id,
             product_id=data.product_id,

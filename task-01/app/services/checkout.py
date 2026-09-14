@@ -82,6 +82,14 @@ class CheckoutService:
                     ),
                 )
 
+            if not product.is_active:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=(
+                        f"Product {product.name} is no longer active"
+                    ),
+                )
+
             if product.available_stock < cart_item.quantity:
                 raise HTTPException(
                     status_code=status.HTTP_409_CONFLICT,
@@ -97,12 +105,15 @@ class CheckoutService:
 
         # Create the order while all required product rows
         # remain locked inside the same transaction.
+        now = datetime.now(timezone.utc)
         order = self.orders.create(cart_id=cart.id)
+        order.created_at = now
 
         for cart_item, product in locked_products:
             self.orders.add_item(
                 order_id=order.id,
                 product_id=product.id,
+                product_name=product.name,
                 quantity=cart_item.quantity,
                 unit_price=product.price,
             )
@@ -112,7 +123,6 @@ class CheckoutService:
                 cart_item.quantity,
             )
 
-        now = datetime.now(timezone.utc)
         expires_at = now + timedelta(
             minutes=RESERVATION_MINUTES,
         )

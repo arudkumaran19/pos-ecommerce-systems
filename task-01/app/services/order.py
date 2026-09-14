@@ -5,6 +5,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
 
 from app.models.order import Order, OrderStatus
+from app.models.payment import PaymentStatus
 from app.models.reservation import ReservationStatus
 from app.repositories.inventory import InventoryRepository
 from app.repositories.order import OrderRepository
@@ -80,6 +81,7 @@ class OrderService:
             .options(
                 selectinload(Order.items),
                 selectinload(Order.reservation),
+                selectinload(Order.payment),
             )
         ).first()
 
@@ -132,10 +134,16 @@ class OrderService:
                 timezone.utc
             )
 
+        # Mark the payment as Refunded when cancelling a previously paid order.
+        if order.status == OrderStatus.PAID.value and order.payment is not None:
+            order.payment.status = PaymentStatus.REFUNDED.value
+
         self.transition_status(
             order,
             OrderStatus.CANCELLED.value,
         )
+
+        order.completed_at = datetime.now(timezone.utc)
 
         self.db.commit()
 

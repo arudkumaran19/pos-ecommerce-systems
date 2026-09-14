@@ -1,3 +1,4 @@
+from datetime import datetime, timezone
 from enum import Enum
 
 from sqlalchemy import CheckConstraint, ForeignKey, String
@@ -11,6 +12,7 @@ class PaymentStatus(str, Enum):
     SUCCEEDED = "Succeeded"
     FAILED = "Failed"
     TIMED_OUT = "TimedOut"
+    REFUNDED = "Refunded"
 
 
 class Payment(Base):
@@ -18,7 +20,7 @@ class Payment(Base):
 
     __table_args__ = (
         CheckConstraint(
-            "status IN ('Pending', 'Succeeded', 'Failed', 'TimedOut')",
+            "status IN ('Pending', 'Succeeded', 'Failed', 'TimedOut', 'Refunded')",
             name="ck_payments_status_valid",
         ),
     )
@@ -41,6 +43,11 @@ class Payment(Base):
         String(20),
         nullable=False,
         default=PaymentStatus.PENDING.value,
+    )
+
+    processed_at: Mapped[datetime | None] = mapped_column(
+        nullable=True,
+        default=None,
     )
     order: Mapped["Order"] = relationship(
         back_populates="payment",

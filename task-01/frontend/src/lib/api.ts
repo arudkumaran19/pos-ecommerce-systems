@@ -35,6 +35,7 @@ export type Cart = {
 
 export type OrderItem = {
     product_id: number
+    product_name: string
     quantity: number
     unit_price: string
 }
@@ -44,6 +45,8 @@ export type Order = {
     cart_id: number
     status: string
     items: OrderItem[]
+    created_at: string        // ISO-8601 UTC
+    completed_at: string | null
 }
 
 export type CheckoutResponse = {
@@ -63,6 +66,7 @@ export type PaymentResponse = {
     order_id: number
     idempotency_key: string
     status: string
+    processed_at: string | null
 }
 
 async function request<T>(
@@ -85,6 +89,13 @@ async function request<T>(
 
             if (typeof error?.detail === "string") {
                 message = error.detail
+            } else if (Array.isArray(error?.detail)) {
+                // FastAPI 422 validation errors — each entry has msg + loc
+                message = error.detail
+                    .map((e: { msg?: string; loc?: string[] }) =>
+                        e.msg ?? JSON.stringify(e),
+                    )
+                    .join("; ")
             }
         } catch {
             // Keep the default HTTP error message.

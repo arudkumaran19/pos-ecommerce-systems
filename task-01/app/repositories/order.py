@@ -67,10 +67,12 @@ class OrderRepository:
             product_id: int,
             quantity: int,
             unit_price,
+            product_name: str,
     ) -> OrderItem:
         item = OrderItem(
             order_id=order_id,
             product_id=product_id,
+            product_name=product_name,
             quantity=quantity,
             unit_price=unit_price,
         )

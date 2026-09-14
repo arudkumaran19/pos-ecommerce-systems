@@ -1,3 +1,6 @@
+from datetime import datetime
+from typing import Optional
+
 from pydantic import BaseModel, Field
 
 from app.services.payment import PaymentOutcome
@@ -17,6 +20,7 @@ class PaymentResponse(BaseModel):
     order_id: int
     idempotency_key: str
     status: str
+    processed_at: Optional[datetime] = None
 
     model_config = {
         "from_attributes": True,

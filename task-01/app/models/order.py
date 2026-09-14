@@ -1,3 +1,4 @@
+from datetime import datetime, timezone
 from enum import Enum
 
 from sqlalchemy import CheckConstraint, ForeignKey, String
@@ -37,6 +38,16 @@ class Order(Base):
         String(20),
         nullable=False,
         default=OrderStatus.PENDING.value,
+    )
+
+    created_at: Mapped[datetime] = mapped_column(
+        nullable=False,
+        default=lambda: datetime.now(timezone.utc),
+    )
+
+    completed_at: Mapped[datetime | None] = mapped_column(
+        nullable=True,
+        default=None,
     )
     items: Mapped[list["OrderItem"]] = relationship(
         back_populates="order",

@@ -196,58 +196,77 @@ def test_payment_timeout_expires_order_and_releases_stock():
         db.close()
 
 def test_duplicate_payment_is_rejected():
+    """
+    Idempotency semantics:
+    - Same key + same order  → returns the existing payment (no error)
+    - Same key + diff order  → rejected with HTTP 422
+    """
     db = SessionLocal()
 
     try:
         product = Product(
             name="Automated Duplicate Payment Test",
             price=45.00,
-            available_stock=5,
+            available_stock=10,
         )
         db.add(product)
         db.flush()
 
-        cart = Cart()
-        db.add(cart)
+        # Cart 1 → order 1
+        cart1 = Cart()
+        db.add(cart1)
         db.flush()
+        db.add(CartItem(cart_id=cart1.id, product_id=product.id, quantity=1))
 
-        db.add(
-            CartItem(
-                cart_id=cart.id,
-                product_id=product.id,
-                quantity=1,
-            )
-        )
+        # Cart 2 → order 2 (different order, same product)
+        cart2 = Cart()
+        db.add(cart2)
+        db.flush()
+        db.add(CartItem(cart_id=cart2.id, product_id=product.id, quantity=1))
+
         db.commit()
 
         checkout_service = CheckoutService(db)
-        order = checkout_service.checkout(cart.id)
+        order1 = checkout_service.checkout(cart1.id)
+        order2 = checkout_service.checkout(cart2.id)
 
         payment_service = PaymentService(db)
 
-        idempotency_key = f"duplicate-payment-test-{order.id}"
+        idempotency_key = f"duplicate-payment-test-{order1.id}"
 
+        # First payment succeeds normally.
         first_payment = payment_service.process_payment(
-            order_id=order.id,
+            order_id=order1.id,
             idempotency_key=idempotency_key,
             outcome=PaymentOutcome.SUCCESS,
         )
 
         assert first_payment.status == PaymentStatus.SUCCEEDED.value
 
+        # Retry with the same key for the SAME order → idempotent return (no error).
+        idempotent_payment = payment_service.process_payment(
+            order_id=order1.id,
+            idempotency_key=idempotency_key,
+            outcome=PaymentOutcome.SUCCESS,
+        )
+        assert idempotent_payment.id == first_payment.id
+        assert idempotent_payment.status == PaymentStatus.SUCCEEDED.value
+
+        # Same key for a DIFFERENT order → must be rejected with 422.
         try:
             payment_service.process_payment(
-                order_id=order.id,
+                order_id=order2.id,
                 idempotency_key=idempotency_key,
                 outcome=PaymentOutcome.SUCCESS,
             )
-            assert False, "Duplicate payment should have been rejected"
+            assert False, "Reusing key for different order should be rejected"
         except HTTPException as exc:
-            assert exc.status_code == 409
+            assert exc.status_code == 422
 
     finally:
         db.rollback()
         db.close()
+
 
 def test_duplicate_checkout_is_rejected():
     db = SessionLocal()
@@ -391,6 +410,8 @@ def test_paid_order_cancellation_restores_stock():
         db.refresh(product)
 
         assert cancelled_order.status == OrderStatus.CANCELLED.value
+        assert cancelled_order.payment is not None
+        assert cancelled_order.payment.status == PaymentStatus.REFUNDED.value
         assert product.available_stock == 5
 
     finally:
@@ -516,3 +537,60 @@ def test_concurrent_checkouts_do_not_oversell():
 
     finally:
         verify_db.close()
+
+def test_inactive_product_rejected_and_product_name_snapshot():
+    from app.services.cart import CartService
+
+    db = SessionLocal()
+
+    try:
+        active_prod = Product(
+            name="Active Snapshot Product",
+            price=15.00,
+            available_stock=10,
+            is_active=True,
+        )
+        inactive_prod = Product(
+            name="Inactive Product Test",
+            price=20.00,
+            available_stock=5,
+            is_active=False,
+        )
+        db.add(active_prod)
+        db.add(inactive_prod)
+        db.flush()
+
+        cart_service = CartService(db)
+        cart = cart_service.create_cart()
+
+        from app.schemas.cart import CartItemCreate
+
+        # 1. Cart service must reject inactive product
+        try:
+            cart_service.add_item(
+                cart.id,
+                CartItemCreate(product_id=inactive_prod.id, quantity=1),
+            )
+            assert False, "Expected 400 for adding inactive product to cart"
+        except HTTPException as exc:
+            assert exc.status_code == 400
+            assert "no longer active" in exc.detail.lower()
+
+        # Add active product to cart
+        cart_service.add_item(
+            cart.id,
+            CartItemCreate(product_id=active_prod.id, quantity=2),
+        )
+        db.commit()
+
+        # 2. Checkout creates order with product_name snapshot
+        checkout_service = CheckoutService(db)
+        order = checkout_service.checkout(cart.id)
+
+        assert len(order.items) == 1
+        assert order.items[0].product_name == "Active Snapshot Product"
+        assert order.items[0].quantity == 2
+
+    finally:
+        db.rollback()
+        db.close()
