@@ -3,10 +3,12 @@ import {
     Coffee,
     Package,
     ShoppingCart,
+    Users,
     X,
 } from "lucide-react"
+import { useAuth } from "../../context/AuthContext"
 
-export type AppPage = "pos" | "orders" | "inventory"
+export type AppPage = "pos" | "orders" | "inventory" | "users"
 
 type SidebarProps = {
     activePage: AppPage
@@ -19,6 +21,7 @@ const navigation: {
     subtitle: string
     page: AppPage
     icon: typeof ShoppingCart
+    managerOnly?: boolean
 }[] = [
     {
         label: "Point of Sale",
@@ -37,6 +40,14 @@ const navigation: {
         subtitle: "Stock & Catalog",
         page: "inventory",
         icon: Package,
+        managerOnly: true,
+    },
+    {
+        label: "Team & Users",
+        subtitle: "Operators & Access",
+        page: "users",
+        icon: Users,
+        managerOnly: true,
     },
 ]
 
@@ -45,6 +56,12 @@ export function Sidebar({
     onNavigate,
     onClose,
 }: SidebarProps) {
+    const { user, isManager } = useAuth()
+
+    const visibleNavigation = navigation.filter(
+        (item) => !item.managerOnly || isManager,
+    )
+
     return (
         <aside className="flex h-full w-64 shrink-0 flex-col border-r border-stone-800/80 bg-[#141210] text-stone-100 select-none">
             {/* Brand Header */}
@@ -94,7 +111,7 @@ export function Sidebar({
                 className="flex-1 space-y-1.5 px-3"
                 aria-label="Primary navigation"
             >
-                {navigation.map((item) => {
+                {visibleNavigation.map((item) => {
                     const Icon = item.icon
                     const active = activePage === item.page
 
@@ -156,8 +173,12 @@ export function Sidebar({
                     </div>
 
                     <div className="mt-2 flex items-center justify-between text-[11px] text-stone-400">
-                        <span>TechLoom POS</span>
-                        <span className="text-stone-500">v1.0.0</span>
+                        <span className="truncate max-w-[130px]">
+                            {user ? user.display_name : "TechLoom POS"}
+                        </span>
+                        <span className="text-stone-500 capitalize">
+                            {user ? user.role : "v1.0.0"}
+                        </span>
                     </div>
                 </div>
             </div>

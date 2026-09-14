@@ -1,7 +1,9 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
+from app.api.deps import get_current_user
 from app.db.session import get_db
+from app.models.user import User
 from app.schemas.order import OrderResponse
 from app.services.order import OrderService
 
@@ -17,10 +19,10 @@ router = APIRouter(
     response_model=list[OrderResponse],
 )
 def get_orders(
-        db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
 ):
     service = OrderService(db)
-
     return service.get_orders()
 
 
@@ -29,11 +31,11 @@ def get_orders(
     response_model=OrderResponse,
 )
 def get_order(
-        order_id: int,
-        db: Session = Depends(get_db),
+    order_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
 ):
     service = OrderService(db)
-
     return service.get_order(order_id)
 
 
@@ -42,9 +44,9 @@ def get_order(
     response_model=OrderResponse,
 )
 def cancel_order(
-        order_id: int,
-        db: Session = Depends(get_db),
+    order_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
 ):
     service = OrderService(db)
-
     return service.cancel_order(order_id)

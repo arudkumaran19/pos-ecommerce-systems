@@ -49,6 +49,18 @@ class Order(Base):
         nullable=True,
         default=None,
     )
+
+    user_id: Mapped[int | None] = mapped_column(
+        ForeignKey("users.id", ondelete="SET NULL"),
+        nullable=True,
+        default=None,
+        index=True,
+    )
+
+    user: Mapped["User | None"] = relationship(
+        back_populates="orders",
+    )
+
     items: Mapped[list["OrderItem"]] = relationship(
         back_populates="order",
         cascade="all, delete-orphan",

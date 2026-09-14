@@ -1,5 +1,10 @@
+import type { CreateUserData, LoginResponse, UpdateUserData, User } from "../types/auth"
+
 const API_BASE_URL =
-    import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000"
+    import.meta.env.VITE_API_BASE_URL ??
+    (typeof window !== "undefined" && window.location.hostname === "localhost"
+        ? "http://localhost:8000"
+        : "http://127.0.0.1:8000")
 
 export type Product = {
     id: number
@@ -69,11 +74,18 @@ export type PaymentResponse = {
     processed_at: string | null
 }
 
+let onUnauthorizedCallback: (() => void) | null = null
+
+export function setOnUnauthorized(callback: (() => void) | null) {
+    onUnauthorizedCallback = callback
+}
+
 async function request<T>(
     path: string,
     options?: RequestInit,
 ): Promise<T> {
     const response = await fetch(`${API_BASE_URL}${path}`, {
+        credentials: "include",
         headers: {
             "Content-Type": "application/json",
             ...options?.headers,
@@ -82,6 +94,10 @@ async function request<T>(
     })
 
     if (!response.ok) {
+        if (response.status === 401 && !path.startsWith("/auth/login")) {
+            onUnauthorizedCallback?.()
+        }
+
         let message = `Request failed with status ${response.status}`
 
         try {
@@ -109,6 +125,53 @@ async function request<T>(
     }
 
     return response.json() as Promise<T>
+}
+
+export async function login(
+    email: string,
+    password: string,
+): Promise<LoginResponse> {
+    return request<LoginResponse>("/auth/login", {
+        method: "POST",
+        body: JSON.stringify({ email, password }),
+    })
+}
+
+export async function logout(): Promise<void> {
+    return request<void>("/auth/logout", {
+        method: "POST",
+    })
+}
+
+export async function getMe(): Promise<User> {
+    return request<User>("/auth/me")
+}
+
+export async function getUsers(): Promise<User[]> {
+    return request<User[]>("/users")
+}
+
+export async function createUser(data: CreateUserData): Promise<User> {
+    return request<User>("/users", {
+        method: "POST",
+        body: JSON.stringify(data),
+    })
+}
+
+export async function updateUser(
+    userId: number,
+    data: UpdateUserData,
+): Promise<User> {
+    return request<User>(`/users/${userId}`, {
+        method: "PATCH",
+        body: JSON.stringify(data),
+    })
+}
+
+export async function deleteUser(userId: number): Promise<{ message: string }> {
+    return request<{ message: string }>(`/users/${userId}`, {
+        method: "DELETE",
+    })
 }
 
 export async function getProducts(): Promise<Product[]> {

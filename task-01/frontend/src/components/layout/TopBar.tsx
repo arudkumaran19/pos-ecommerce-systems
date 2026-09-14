@@ -1,13 +1,17 @@
 import { useState } from "react"
 import {
     Bell,
+    ChevronDown,
     CircleHelp,
     Coffee,
+    LogOut,
     Menu,
+    Shield,
     ShieldCheck,
     ShoppingCart,
     Sparkles,
 } from "lucide-react"
+import { useAuth } from "../../context/AuthContext"
 
 type TopBarProps = {
     title: string
@@ -20,11 +24,12 @@ export function TopBar({
     cartItemCount = 0,
     onMenuClick,
 }: TopBarProps) {
+    const { user, logout } = useAuth()
     const [openPanel, setOpenPanel] = useState<
-        "notifications" | "help" | null
+        "notifications" | "help" | "profile" | null
     >(null)
 
-    function togglePanel(panel: "notifications" | "help") {
+    function togglePanel(panel: "notifications" | "help" | "profile") {
         setOpenPanel((current) => (current === panel ? null : panel))
     }
 
@@ -207,6 +212,78 @@ export function TopBar({
                         {cartItemCount}
                     </span>
                 </div>
+
+                {/* Operator Profile Capsule */}
+                {user && (
+                    <div className="relative">
+                        <button
+                            type="button"
+                            aria-label="Operator Profile"
+                            aria-expanded={openPanel === "profile"}
+                            onClick={() => togglePanel("profile")}
+                            className={[
+                                "flex items-center gap-2 rounded-xl border border-stone-200/90 bg-stone-50/80 px-2.5 py-1.5 shadow-sm transition-all duration-150 hover:border-stone-300 hover:bg-stone-100/90 active:scale-95",
+                                openPanel === "profile" ? "border-stone-400 bg-stone-100 ring-2 ring-amber-500/20" : "",
+                            ].join(" ")}
+                        >
+                            <div className={[
+                                "flex size-6 items-center justify-center rounded-lg text-[10px] font-bold text-white shadow-xs",
+                                user.role === "manager"
+                                    ? "bg-gradient-to-br from-amber-500 to-amber-700"
+                                    : "bg-gradient-to-br from-emerald-500 to-teal-700",
+                            ].join(" ")}>
+                                {user.display_name.slice(0, 2).toUpperCase()}
+                            </div>
+                            <div className="hidden text-left sm:block">
+                                <p className="truncate text-xs font-semibold leading-tight text-stone-800">
+                                    {user.display_name}
+                                </p>
+                                <p className="text-[10px] font-medium text-stone-400 capitalize">
+                                    {user.role}
+                                </p>
+                            </div>
+                            <ChevronDown className="size-3 text-stone-400" />
+                        </button>
+
+                        {openPanel === "profile" && (
+                            <div className="absolute right-0 top-11 z-[80] w-64 rounded-2xl border border-stone-200/90 bg-white p-3 shadow-2xl backdrop-blur-xl animate-in fade-in slide-in-from-top-2 duration-150">
+                                <div className="border-b border-stone-100 pb-2.5 px-1">
+                                    <p className="text-xs font-bold text-stone-900 truncate">
+                                        {user.display_name}
+                                    </p>
+                                    <p className="text-[11px] text-stone-400 truncate">
+                                        {user.email}
+                                    </p>
+                                    <div
+                                        className="mt-1.5 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold capitalize border"
+                                        style={{
+                                            backgroundColor: user.role === "manager" ? "#fffbeb" : "#ecfdf5",
+                                            color: user.role === "manager" ? "#b45309" : "#047857",
+                                            borderColor: user.role === "manager" ? "#fde68a" : "#a7f3d0",
+                                        }}
+                                    >
+                                        <Shield className="size-3" />
+                                        {user.role} Privilege
+                                    </div>
+                                </div>
+
+                                <div className="pt-2">
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            setOpenPanel(null)
+                                            logout()
+                                        }}
+                                        className="flex w-full items-center gap-2 rounded-xl px-2.5 py-2 text-xs font-semibold text-rose-600 transition-colors hover:bg-rose-50 active:scale-[0.98]"
+                                    >
+                                        <LogOut className="size-3.5" />
+                                        <span>Sign Out</span>
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                )}
             </div>
         </header>
     )
