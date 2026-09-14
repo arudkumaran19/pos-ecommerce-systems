@@ -16,24 +16,29 @@ from app.services.expiry import ReservationExpiryService
 
 async def reservation_expiry_worker():
     while True:
+        db = None
+
         try:
             db = SessionLocal()
 
-            try:
-                service = ReservationExpiryService(db)
-                expired_count = service.expire_due_reservations()
+            service = ReservationExpiryService(db)
+            expired_count = await asyncio.to_thread(
+                service.expire_due_reservations
+            )
 
-                if expired_count > 0:
-                    print(
-                        f"Expired {expired_count} reservation(s)"
-                    )
-            finally:
-                db.close()
+            if expired_count > 0:
+                print(
+                    f"Expired {expired_count} reservation(s)"
+                )
 
         except Exception as exc:
             print(
                 f"Reservation expiry worker error: {exc}"
             )
+
+        finally:
+            if db is not None:
+                db.close()
 
         await asyncio.sleep(5)
 
@@ -52,7 +57,6 @@ async def lifespan(app: FastAPI):
         await worker
     except asyncio.CancelledError:
         pass
-
 
 app = FastAPI(
     title="Techloom POS API",
