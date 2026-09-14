@@ -14,7 +14,10 @@ import {
 } from "../../lib/api"
 
 import { ProductGrid, type Product } from "./ProductGrid"
-import { ProductToolbar } from "./ProductToolbar"
+import {
+    ProductToolbar,
+    type StockFilter,
+} from "./ProductToolbar"
 import {
     CartPanel,
     type CartItem,
@@ -31,6 +34,8 @@ function mapProduct(product: ApiProduct): Product {
 
 export function POSPage() {
     const [search, setSearch] = useState("")
+    const [stockFilter, setStockFilter] =
+        useState<StockFilter>("all")
     const [products, setProducts] = useState<Product[]>([])
     const [cartItems, setCartItems] = useState<CartItem[]>([])
     const [cartId, setCartId] = useState<number | null>(null)
@@ -70,7 +75,11 @@ export function POSPage() {
 
 
                 if (!cancelled) {
-                    setProducts(response.map(mapProduct))
+                    setProducts(
+                        response
+                            .filter((product) => product.is_active)
+                            .map(mapProduct),
+                    )
                 }
 
             } catch (requestError) {
@@ -126,14 +135,23 @@ export function POSPage() {
     const filteredProducts = useMemo(() => {
         const normalizedSearch = search.trim().toLowerCase()
 
-        if (!normalizedSearch) {
-            return products
-        }
+        return products.filter((product) => {
+            const matchesSearch =
+                !normalizedSearch ||
+                product.name.toLowerCase().includes(normalizedSearch)
 
-        return products.filter((product) =>
-            product.name.toLowerCase().includes(normalizedSearch),
-        )
-    }, [products, search])
+            const matchesStock =
+                stockFilter === "all"
+                    ? true
+                    : stockFilter === "in-stock"
+                        ? product.stock > 5
+                        : stockFilter === "low-stock"
+                            ? product.stock > 0 && product.stock <= 5
+                            : product.stock === 0
+
+            return matchesSearch && matchesStock
+        })
+    }, [products, search, stockFilter])
 
     const addToCart = async (productId: number) => {
         const product = products.find((item) => item.id === productId)
@@ -176,6 +194,10 @@ export function POSPage() {
                 },
             ]
         })
+
+        if (window.matchMedia("(max-width: 1279px)").matches) {
+            setMobileCartOpen(true)
+        }
     }
 
     const increaseQuantity = async (productId: number) => {
@@ -360,7 +382,11 @@ export function POSPage() {
             // Refresh inventory so product cards show current stock.
             const refreshedProducts = await getProducts()
 
-            setProducts(refreshedProducts.map(mapProduct))
+            setProducts(
+                refreshedProducts
+                    .filter((product) => product.is_active)
+                    .map(mapProduct),
+            )
 
             // Start a fresh cart for the next order.
             const newCart = await createCart()
@@ -408,6 +434,8 @@ export function POSPage() {
                     <ProductToolbar
                         search={search}
                         onSearchChange={setSearch}
+                        stockFilter={stockFilter}
+                        onStockFilterChange={setStockFilter}
                     />
 
 

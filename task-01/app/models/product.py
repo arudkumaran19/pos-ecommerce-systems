@@ -27,6 +27,10 @@ class Product(Base):
         nullable=False,
         default=0,
     )
+    is_active: Mapped[bool] = mapped_column(
+        nullable=False,
+        default=True,
+    )
     cart_items: Mapped[list["CartItem"]] = relationship(
         back_populates="product",
     )

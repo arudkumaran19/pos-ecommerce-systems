@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useEffect } from "react"
 import {
     CheckCircle2,
     Info,
@@ -18,31 +18,22 @@ type ToastProps = {
 export function Toast({
                           message,
                           variant = "success",
-                          duration = 5000,
+                          duration = 3000,
                           onClose,
                       }: ToastProps) {
-    const [visible, setVisible] = useState(false)
-
     useEffect(() => {
-        if (!message) {
-            setVisible(false)
-            return
-        }
-
-        setVisible(true)
-
-        if (duration <= 0) {
+        if (!message || duration <= 0) {
             return
         }
 
         const timer = window.setTimeout(() => {
-            setVisible(false)
+            onClose()
         }, duration)
 
         return () => {
             window.clearTimeout(timer)
         }
-    }, [message, duration])
+    }, [message, duration, onClose])
 
     if (!message) {
         return null
@@ -67,20 +58,8 @@ export function Toast({
             className={[
                 "fixed right-5 top-5 z-[100] w-[min(420px,calc(100vw-2.5rem))]",
                 "rounded-xl border px-4 py-3 shadow-lg",
-                "transition-all duration-300 ease-out",
-                visible
-                    ? "translate-y-0 opacity-100"
-                    : "-translate-y-2 opacity-0",
                 styles,
             ].join(" ")}
-            onTransitionEnd={(event) => {
-                if (
-                    event.propertyName === "opacity" &&
-                    !visible
-                ) {
-                    onClose()
-                }
-            }}
             role="status"
             aria-live="polite"
         >
@@ -93,7 +72,7 @@ export function Toast({
 
                 <button
                     type="button"
-                    onClick={() => setVisible(false)}
+                    onClick={onClose}
                     className="shrink-0 rounded-md p-0.5 opacity-60 transition hover:bg-black/5 hover:opacity-100"
                     aria-label="Dismiss notification"
                 >

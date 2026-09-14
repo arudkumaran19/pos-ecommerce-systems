@@ -6,6 +6,7 @@ export type Product = {
     name: string
     price: string
     available_stock: number
+    is_active: boolean
 }
 
 export type ProductCreate = {
@@ -15,9 +16,10 @@ export type ProductCreate = {
 }
 
 export type ProductUpdate = {
-    name?: string | null
-    price?: number | null
-    available_stock?: number | null
+    name?: string
+    price?: number
+    available_stock?: number
+    is_active?: boolean
 }
 
 export type CartItem = {

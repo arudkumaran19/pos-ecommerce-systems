@@ -1,6 +1,5 @@
-from decimal import Decimal
-
 from fastapi import HTTPException, status
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.repositories.product import ProductRepository
@@ -58,6 +57,16 @@ class ProductService:
     def delete_product(self, product_id: int):
         product = self.get_product(product_id)
 
-        self.repository.delete(product)
+        try:
+            self.repository.delete(product)
+            self.db.commit()
+        except IntegrityError:
+            self.db.rollback()
 
-        self.db.commit()
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=(
+                    "This product cannot be deleted because it is "
+                    "already referenced by a cart or order."
+                ),
+            )

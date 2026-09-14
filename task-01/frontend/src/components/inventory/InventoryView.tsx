@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react"
 import { Toast } from "../ui/Toast"
 import {
-    AlertTriangle,
+
     Edit3,
     Package,
     Plus,
@@ -61,9 +61,14 @@ function formatPrice(price: string) {
 export function InventoryView() {
     const [products, setProducts] = useState<Product[]>([])
     const [search, setSearch] = useState("")
+    type InventoryStatusFilter = "all" | "active" | "archived"
+
+    const [statusFilter, setStatusFilter] =
+        useState<InventoryStatusFilter>("all")
     const [loading, setLoading] = useState(true)
     const [saving, setSaving] = useState(false)
     const [deletingId, setDeletingId] = useState<number | null>(null)
+    const [archivingId, setArchivingId] = useState<number | null>(null)
 
     const [error, setError] = useState("")
     const [successMessage, setSuccessMessage] = useState("")
@@ -98,40 +103,57 @@ export function InventoryView() {
     const filteredProducts = useMemo(() => {
         const query = search.trim().toLowerCase()
 
-        if (!query) {
-            return products
-        }
+        return products.filter((product) => {
+            const matchesSearch =
+                !query ||
+                product.name.toLowerCase().includes(query)
 
-        return products.filter((product) =>
-            product.name.toLowerCase().includes(query),
-        )
-    }, [products, search])
+            const matchesStatus =
+                statusFilter === "all"
+                    ? true
+                    : statusFilter === "active"
+                        ? product.is_active
+                        : !product.is_active
 
-    const totalStock = useMemo(
+            return matchesSearch && matchesStatus
+        })
+    }, [products, search, statusFilter])
+
+    const activeProducts = useMemo(
+        () => products.filter((product) => product.is_active),
+        [products],
+    )
+
+    const archivedProducts = useMemo(
+        () => products.filter((product) => !product.is_active),
+        [products],
+    )
+
+    const activeStock = useMemo(
         () =>
-            products.reduce(
+            activeProducts.reduce(
                 (total, product) => total + product.available_stock,
                 0,
             ),
-        [products],
+        [activeProducts],
     )
 
     const lowStockCount = useMemo(
         () =>
-            products.filter(
+            activeProducts.filter(
                 (product) =>
                     product.available_stock > 0 &&
                     product.available_stock <= 5,
             ).length,
-        [products],
+        [activeProducts],
     )
 
     const outOfStockCount = useMemo(
         () =>
-            products.filter(
+            activeProducts.filter(
                 (product) => product.available_stock === 0,
             ).length,
-        [products],
+        [activeProducts],
     )
 
     function openCreateForm() {
@@ -283,6 +305,54 @@ export function InventoryView() {
         }
     }
 
+    async function handleArchiveToggle(product: Product) {
+        const nextIsActive = !product.is_active
+        const action = nextIsActive ? "restore" : "archive"
+
+        const confirmed = window.confirm(
+            nextIsActive
+                ? `Restore "${product.name}"?\n\nThis will make the product available for sale again.`
+                : `Archive "${product.name}"?\n\nThis will remove the product from the POS catalog, but keep its history.`,
+        )
+
+        if (!confirmed) return
+
+        setArchivingId(product.id)
+        setError("")
+        setSuccessMessage("")
+
+        try {
+            await updateProduct(product.id, {
+                is_active: nextIsActive,
+            })
+
+            setProducts((current) =>
+                current.map((item) =>
+                    item.id === product.id
+                        ? {
+                            ...item,
+                            is_active: nextIsActive,
+                        }
+                        : item,
+                ),
+            )
+
+            setSuccessMessage(
+                nextIsActive
+                    ? `Product "${product.name}" was restored successfully.`
+                    : `Product "${product.name}" was archived successfully.`,
+            )
+        } catch (err) {
+            setError(
+                err instanceof Error
+                    ? err.message
+                    : `Unable to ${action} the product.`,
+            )
+        } finally {
+            setArchivingId(null)
+        }
+    }
+
     return (
         <div className="p-6 lg:p-8">
             <div className="mx-auto max-w-7xl">
@@ -328,24 +398,46 @@ export function InventoryView() {
                     </div>
                 </div>
 
-                <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
+                <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
                     <div className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">
                         <p className="text-sm text-zinc-500">
-                            Products
+                            Active products
                         </p>
 
                         <p className="mt-2 text-2xl font-semibold text-zinc-950">
-                            {products.length}
+                            {activeProducts.length}
+                        </p>
+
+                        <p className="mt-1 text-xs text-zinc-400">
+                            Currently available in POS
                         </p>
                     </div>
 
                     <div className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">
                         <p className="text-sm text-zinc-500">
-                            Total units
+                            Archived products
                         </p>
 
                         <p className="mt-2 text-2xl font-semibold text-zinc-950">
-                            {totalStock}
+                            {archivedProducts.length}
+                        </p>
+
+                        <p className="mt-1 text-xs text-zinc-400">
+                            Kept for historical records
+                        </p>
+                    </div>
+
+                    <div className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">
+                        <p className="text-sm text-zinc-500">
+                            Active units
+                        </p>
+
+                        <p className="mt-2 text-2xl font-semibold text-zinc-950">
+                            {activeStock}
+                        </p>
+
+                        <p className="mt-1 text-xs text-zinc-400">
+                            Stock from active products
                         </p>
                     </div>
 
@@ -365,12 +457,12 @@ export function InventoryView() {
                 </div>
 
 
-                {error && (
-                    <div className="mt-5 flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-                        <AlertTriangle className="mt-0.5 size-4 shrink-0" />
-                        <span>{error}</span>
-                    </div>
-                )}
+                <Toast
+                    message={error || null}
+                    variant="error"
+                    duration={3000}
+                    onClose={() => setError("")}
+                />
 
                 <div className="mt-6 overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm">
                     <div className="flex flex-col gap-3 border-b border-zinc-200 p-4 sm:flex-row sm:items-center sm:justify-between">
@@ -385,18 +477,35 @@ export function InventoryView() {
                             </p>
                         </div>
 
-                        <div className="relative w-full sm:w-72">
-                            <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-zinc-400" />
+                        <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
+                            <div className="relative w-full sm:w-64">
+                                <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-zinc-400" />
 
-                            <input
-                                type="search"
-                                value={search}
+                                <input
+                                    type="search"
+                                    value={search}
+                                    onChange={(event) =>
+                                        setSearch(event.target.value)
+                                    }
+                                    placeholder="Search products..."
+                                    className="w-full rounded-xl border border-zinc-200 bg-zinc-50 py-2.5 pl-9 pr-3 text-sm outline-none transition placeholder:text-zinc-400 focus:border-zinc-400 focus:bg-white"
+                                />
+                            </div>
+
+                            <select
+                                value={statusFilter}
                                 onChange={(event) =>
-                                    setSearch(event.target.value)
+                                    setStatusFilter(
+                                        event.target.value as InventoryStatusFilter,
+                                    )
                                 }
-                                placeholder="Search products..."
-                                className="w-full rounded-xl border border-zinc-200 bg-zinc-50 py-2.5 pl-9 pr-3 text-sm outline-none transition placeholder:text-zinc-400 focus:border-zinc-400 focus:bg-white"
-                            />
+                                className="w-full rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2.5 text-sm text-zinc-700 outline-none transition focus:border-zinc-400 focus:bg-white sm:w-36"
+                                aria-label="Filter products by status"
+                            >
+                                <option value="all">All products</option>
+                                <option value="active">Active</option>
+                                <option value="archived">Archived</option>
+                            </select>
                         </div>
                     </div>
 
@@ -416,15 +525,19 @@ export function InventoryView() {
                                 <Package className="mx-auto size-8 text-zinc-300" />
 
                                 <p className="mt-3 text-sm font-semibold text-zinc-900">
-                                    {search
+                                    {search || statusFilter !== "all"
                                         ? "No matching products"
                                         : "No products yet"}
                                 </p>
 
                                 <p className="mt-1 text-sm text-zinc-500">
                                     {search
-                                        ? "Try a different search term."
-                                        : "Add your first product to get started."}
+                                        ? "Try a different search term or status filter."
+                                        : statusFilter === "archived"
+                                            ? "There are no archived products."
+                                            : statusFilter === "active"
+                                                ? "There are no active products."
+                                                : "Add your first product to get started."}
                                 </p>
                             </div>
                         </div>
@@ -494,18 +607,29 @@ export function InventoryView() {
                                         </td>
 
                                         <td className="px-5 py-4">
-                                                <span
-                                                    className={[
-                                                        "inline-flex rounded-full px-2.5 py-1 text-xs font-medium ring-1 ring-inset",
-                                                        getStockClasses(
-                                                            product.available_stock,
-                                                        ),
-                                                    ].join(" ")}
-                                                >
-                                                    {getStockLabel(
-                                                        product.available_stock,
-                                                    )}
-                                                </span>
+                                            <div className="flex flex-wrap gap-2">
+    <span
+        className={[
+            "inline-flex rounded-full px-2.5 py-1 text-xs font-medium ring-1 ring-inset",
+            product.is_active
+                ? "bg-emerald-50 text-emerald-700 ring-emerald-200"
+                : "bg-zinc-100 text-zinc-600 ring-zinc-200",
+        ].join(" ")}
+    >
+        {product.is_active ? "Active" : "Archived"}
+    </span>
+
+                                                {product.is_active && (
+                                                    <span
+                                                        className={[
+                                                            "inline-flex rounded-full px-2.5 py-1 text-xs font-medium ring-1 ring-inset",
+                                                            getStockClasses(product.available_stock),
+                                                        ].join(" ")}
+                                                    >
+            {getStockLabel(product.available_stock)}
+        </span>
+                                                )}
+                                            </div>
                                         </td>
 
                                         <td className="px-5 py-4">
@@ -521,6 +645,39 @@ export function InventoryView() {
                                                 >
                                                     <Edit3 className="size-3.5" />
                                                     Edit
+                                                </button>
+
+                                                <button
+                                                    type="button"
+                                                    onClick={() =>
+                                                        void handleArchiveToggle(product)
+                                                    }
+                                                    disabled={
+                                                        archivingId === product.id ||
+                                                        deletingId === product.id
+                                                    }
+                                                    className={[
+                                                        "inline-flex items-center gap-1.5 rounded-lg border px-3 py-2 text-xs font-medium transition disabled:opacity-50",
+                                                        product.is_active
+                                                            ? "border-amber-200 text-amber-700 hover:bg-amber-50"
+                                                            : "border-emerald-200 text-emerald-700 hover:bg-emerald-50",
+                                                    ].join(" ")}
+                                                >
+                                                    {archivingId === product.id ? (
+                                                        <RefreshCw className="size-3.5 animate-spin" />
+                                                    ) : product.is_active ? (
+                                                        <Package className="size-3.5" />
+                                                    ) : (
+                                                        <RefreshCw className="size-3.5" />
+                                                    )}
+
+                                                    {archivingId === product.id
+                                                        ? product.is_active
+                                                            ? "Archiving..."
+                                                            : "Restoring..."
+                                                        : product.is_active
+                                                            ? "Archive"
+                                                            : "Restore"}
                                                 </button>
 
                                                 <button
@@ -704,9 +861,16 @@ export function InventoryView() {
                 </div>
             )}
             <Toast
+                message={error || null}
+                variant="error"
+                duration={3000}
+                onClose={() => setError("")}
+            />
+
+            <Toast
                 message={successMessage || null}
                 variant="success"
-                duration={5000}
+                duration={3000}
                 onClose={() => setSuccessMessage("")}
             />
         </div>

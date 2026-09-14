@@ -10,20 +10,10 @@ class ProductCreate(BaseModel):
 
 
 class ProductUpdate(BaseModel):
-    name: str | None = Field(
-        default=None,
-        min_length=1,
-        max_length=255,
-    )
-    price: Decimal | None = Field(
-        default=None,
-        ge=0,
-        decimal_places=2,
-    )
-    available_stock: int | None = Field(
-        default=None,
-        ge=0,
-    )
+    name: str | None = Field(default=None, min_length=1, max_length=255)
+    price: Decimal | None = Field(default=None, ge=0, decimal_places=2)
+    available_stock: int | None = Field(default=None, ge=0)
+    is_active: bool | None = None
 
 
 class ProductResponse(BaseModel):
@@ -31,5 +21,6 @@ class ProductResponse(BaseModel):
     name: str
     price: Decimal
     available_stock: int
+    is_active: bool
 
     model_config = ConfigDict(from_attributes=True)
