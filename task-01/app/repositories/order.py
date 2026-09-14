@@ -17,6 +17,7 @@ class OrderRepository:
                 selectinload(Order.items),
                 selectinload(Order.reservation),
                 selectinload(Order.payment),
+                selectinload(Order.user),
             )
         )
 
@@ -30,6 +31,7 @@ class OrderRepository:
                 selectinload(Order.items),
                 selectinload(Order.reservation),
                 selectinload(Order.payment),
+                selectinload(Order.user),
             )
         )
 
@@ -43,6 +45,7 @@ class OrderRepository:
                 selectinload(Order.items),
                 selectinload(Order.reservation),
                 selectinload(Order.payment),
+                selectinload(Order.user),
             )
         )
 

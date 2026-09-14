@@ -45,6 +45,13 @@ export type OrderItem = {
     unit_price: string
 }
 
+export type HandledBy = {
+    id: number
+    display_name: string
+    email: string
+    role: string
+}
+
 export type Order = {
     id: number
     cart_id: number
@@ -52,6 +59,7 @@ export type Order = {
     items: OrderItem[]
     created_at: string        // ISO-8601 UTC
     completed_at: string | null
+    handled_by: HandledBy | null
 }
 
 export type CheckoutResponse = {

@@ -10,12 +10,14 @@ import {
     Package,
     RefreshCw,
     Search,
+    User,
     XCircle,
 } from "lucide-react"
 
 import {
     cancelOrder,
     getOrders,
+    type HandledBy,
     type Order,
 } from "../../lib/api"
 
@@ -66,6 +68,19 @@ function formatCurrency(value: number) {
         style: "currency",
         currency: "USD",
     }).format(value)
+}
+
+/** Returns a short display label for the handler, or a legacy fallback. */
+function formatHandledBy(handler: HandledBy | null | undefined): string {
+    if (!handler) return "Unknown / Legacy Order"
+    return handler.display_name
+}
+
+/** Returns handler display with role badge text, e.g. "Maya Patel · Manager" */
+function formatHandledByWithRole(handler: HandledBy | null | undefined): string {
+    if (!handler) return "Unknown / Legacy Order"
+    const role = handler.role.charAt(0).toUpperCase() + handler.role.slice(1)
+    return `${handler.display_name} · ${role}`
 }
 
 /** Format an ISO timestamp to a short time string, e.g. "2:47 PM" */
@@ -504,6 +519,16 @@ export function OrderHistory({
                                                     {" · "}
                                                     {ts.label} {formatTime(ts.iso)}
                                                 </p>
+
+                                                <p className="mt-1 flex items-center gap-1 text-[11px] text-stone-400 font-medium">
+                                                    <User className="size-3 shrink-0" />
+                                                    <span>
+                                                        Handled by{" "}
+                                                        <span className={order.handled_by ? "font-semibold text-stone-600" : "italic"}>
+                                                            {formatHandledBy(order.handled_by)}
+                                                        </span>
+                                                    </span>
+                                                </p>
                                             </div>
 
                                             <ChevronRight className="size-4 shrink-0 text-stone-400" />
@@ -560,6 +585,22 @@ export function OrderHistory({
                                                         </span>
                                                     </p>
                                                 )}
+
+                                                <p className="flex items-center gap-1 pt-0.5">
+                                                    <User className="size-3 shrink-0 text-stone-400" />
+                                                    <span>
+                                                        Handled by{" "}
+                                                        <span
+                                                            className={
+                                                                selectedOrder.handled_by
+                                                                    ? "font-semibold text-stone-700"
+                                                                    : "italic text-stone-400"
+                                                            }
+                                                        >
+                                                            {formatHandledByWithRole(selectedOrder.handled_by)}
+                                                        </span>
+                                                    </span>
+                                                </p>
                                             </div>
                                         </div>
 
