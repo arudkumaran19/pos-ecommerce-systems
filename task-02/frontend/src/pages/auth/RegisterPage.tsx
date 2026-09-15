@@ -2,10 +2,12 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ShoppingBag, Lock, Mail, User as UserIcon, AlertCircle } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import { useToast } from '../../context/ToastContext';
 
 export const RegisterPage: React.FC = () => {
   const { register } = useAuth();
   const navigate = useNavigate();
+  const toast = useToast();
 
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
@@ -17,6 +19,7 @@ export const RegisterPage: React.FC = () => {
     e.preventDefault();
     if (password.length < 8) {
       setError('Password must be at least 8 characters long.');
+      toast.error('Password must be at least 8 characters long.');
       return;
     }
 
@@ -24,9 +27,12 @@ export const RegisterPage: React.FC = () => {
       setLoading(true);
       setError(null);
       await register(email, fullName, password);
+      toast.success('Account created! Welcome to TechLoom.');
       navigate('/');
     } catch (err: any) {
-      setError(err.message || 'Registration failed.');
+      const msg = err.message || 'Registration failed.';
+      setError(msg);
+      toast.error(msg);
     } finally {
       setLoading(false);
     }

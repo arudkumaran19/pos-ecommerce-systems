@@ -23,6 +23,7 @@ class PaymentResponse(BaseSchema):
     order_id: UUID
     idempotency_key: str
     status: PaymentStatus
+    order_status: Optional[str] = None
     amount: Decimal
     provider: str
     provider_reference: Optional[str] = None

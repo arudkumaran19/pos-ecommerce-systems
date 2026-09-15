@@ -4,12 +4,14 @@ import { Package, ArrowRight, XCircle, AlertCircle, CheckCircle2 } from 'lucide-
 import { Order, PaginatedResponse } from '../../types';
 import { apiRequest } from '../../lib/api-client';
 import { formatCurrency, formatDate, getOrderStatusColor } from '../../lib/formatters';
+import { useToast } from '../../context/ToastContext';
 
 export const MyOrdersPage: React.FC = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [cancellingId, setCancellingId] = useState<string | null>(null);
   const [feedbackMsg, setFeedbackMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const toast = useToast();
 
   const fetchOrders = async () => {
     try {
@@ -36,16 +38,20 @@ export const MyOrdersPage: React.FC = () => {
       setCancellingId(orderId);
       setFeedbackMsg(null);
       await apiRequest(`/api/v1/orders/${orderId}/cancel`, { method: 'POST' });
+      const msg = 'Order cancelled successfully.';
       setFeedbackMsg({
         type: 'success',
-        text: 'Order cancelled successfully.',
+        text: msg,
       });
+      toast.success(msg);
       await fetchOrders();
     } catch (err: any) {
+      const msg = err.message || 'Failed to cancel order.';
       setFeedbackMsg({
         type: 'error',
-        text: err.message || 'Failed to cancel order.',
+        text: msg,
       });
+      toast.error(msg);
     } finally {
       setCancellingId(null);
     }

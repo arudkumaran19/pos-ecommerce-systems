@@ -6,7 +6,7 @@ from app.models.user import User
 from app.services.checkout_service import CheckoutService
 from app.api.deps import get_current_user, verify_csrf
 
-router = APIRouter(prefix="/checkout", tags=["Checkout & Stock Reservation"], dependencies=[Depends(verify_csrf)])
+router = APIRouter(prefix="/checkout", tags=["Checkout"], dependencies=[Depends(verify_csrf)])
 
 @router.post("", response_model=OrderResponse)
 def checkout(

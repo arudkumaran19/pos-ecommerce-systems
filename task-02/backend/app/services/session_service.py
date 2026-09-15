@@ -22,7 +22,7 @@ class SessionService:
         """
         Creates a new server-side session.
         Returns:
-            (raw_session_token, csrf_token)
+            (raw_session_token, csrf_token)S
         Only the SHA-256 hash of raw_session_token is saved in PostgreSQL.
         """
         raw_token = generate_session_token()

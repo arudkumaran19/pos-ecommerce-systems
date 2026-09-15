@@ -14,8 +14,10 @@ import {
 import { apiClient } from '../../lib/api-client';
 import { Product, PaginatedResponse } from '../../types';
 import { formatCurrency } from '../../lib/formatters';
+import { useToast } from '../../context/ToastContext';
 
 export const AdminProductsPage: React.FC = () => {
+  const toast = useToast();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [total, setTotal] = useState(0);
@@ -116,7 +118,9 @@ export const AdminProductsPage: React.FC = () => {
           image_url: formData.image_url,
           is_active: formData.is_active
         });
-        setSuccessMsg(`Updated product: ${formData.name}`);
+        const editMsg = `Updated product: ${formData.name}`;
+        setSuccessMsg(editMsg);
+        toast.success(editMsg);
       } else {
         await apiClient.post('/api/v1/admin/products', {
           name: formData.name,
@@ -127,12 +131,16 @@ export const AdminProductsPage: React.FC = () => {
           image_url: formData.image_url,
           is_active: formData.is_active
         });
-        setSuccessMsg(`Created new product: ${formData.name}`);
+        const createMsg = `Created new product: ${formData.name}`;
+        setSuccessMsg(createMsg);
+        toast.success(createMsg);
       }
       setModalOpen(false);
       fetchProducts();
     } catch (err: any) {
-      setFormError(err.message || 'Failed to save product');
+      const errMsg = err.message || 'Failed to save product';
+      setFormError(errMsg);
+      toast.error(errMsg);
     } finally {
       setFormLoading(false);
     }

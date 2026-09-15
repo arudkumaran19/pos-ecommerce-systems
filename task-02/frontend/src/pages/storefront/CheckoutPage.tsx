@@ -1,17 +1,21 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Lock, ArrowRight, ShieldCheck, MapPin } from 'lucide-react';
 import { useCart } from '../../context/CartContext';
+import { useAuth } from '../../context/AuthContext';
+import { useToast } from '../../context/ToastContext';
 import { apiRequest } from '../../lib/api-client';
 import { formatCurrency } from '../../lib/formatters';
 import { Order } from '../../types';
 
 export const CheckoutPage: React.FC = () => {
   const { cart, refreshCart } = useCart();
+  const { user } = useAuth();
+  const toast = useToast();
   const navigate = useNavigate();
 
   const [shippingAddress, setShippingAddress] = useState({
-    full_name: 'John Doe',
+    full_name: user?.full_name || '',
     address_line1: '42 Oxford Street',
     city: 'London',
     postal_code: 'W1D 1BS',
@@ -19,6 +23,12 @@ export const CheckoutPage: React.FC = () => {
   });
   const [submitting, setSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (user?.full_name && !shippingAddress.full_name) {
+      setShippingAddress((prev) => ({ ...prev, full_name: user.full_name }));
+    }
+  }, [user]);
 
   const items = cart?.items || [];
 
@@ -53,9 +63,12 @@ export const CheckoutPage: React.FC = () => {
       });
 
       await refreshCart();
+      toast.success('Order created! Please complete payment within 5 minutes.');
       navigate(`/payment/${order.id}`);
     } catch (err: any) {
-      setErrorMsg(err.message || 'Could not complete checkout. Please try again.');
+      const msg = err.message || 'Could not complete checkout. Please try again.';
+      setErrorMsg(msg);
+      toast.error(msg);
     } finally {
       setSubmitting(false);
     }
@@ -161,7 +174,7 @@ export const CheckoutPage: React.FC = () => {
             ) : (
               <>
                 <Lock className="w-4 h-4" />
-                Reserve Stock & Continue to Payment
+                Confirm & Proceed to Payment
                 <ArrowRight className="w-4 h-4" />
               </>
             )}

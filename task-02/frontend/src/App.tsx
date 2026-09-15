@@ -2,6 +2,8 @@ import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate, Outlet, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
+import { ToastProvider } from './context/ToastContext';
+import { LoadingScreen } from './components/common/LoadingScreen';
 
 // Layout Components
 import { Navbar } from './components/layout/Navbar';
@@ -54,11 +56,7 @@ const ProtectedRoute: React.FC = () => {
   const location = useLocation();
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-950">
-        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-emerald-500" />
-      </div>
-    );
+    return <LoadingScreen message="Verifying session..." submessage="Checking secure authentication credentials" />;
   }
 
   if (!user) {
@@ -73,11 +71,7 @@ const GuestRoute: React.FC = () => {
   const { user, loading } = useAuth();
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-950">
-        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-emerald-500" />
-      </div>
-    );
+    return <LoadingScreen message="Verifying session..." submessage="Preparing your secure guest access" />;
   }
 
   if (user) {
@@ -90,9 +84,10 @@ const GuestRoute: React.FC = () => {
 function App() {
   return (
     <BrowserRouter>
-      <AuthProvider>
-        <CartProvider>
-          <Routes>
+      <ToastProvider>
+        <AuthProvider>
+          <CartProvider>
+            <Routes>
             {/* Storefront Layout Routes */}
             <Route element={<StorefrontLayout />}>
               {/* Public Storefront */}
@@ -134,6 +129,7 @@ function App() {
           </Routes>
         </CartProvider>
       </AuthProvider>
+      </ToastProvider>
     </BrowserRouter>
   );
 }

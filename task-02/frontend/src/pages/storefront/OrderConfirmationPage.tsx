@@ -4,6 +4,7 @@ import { CheckCircle2, Package, ArrowRight, Home } from 'lucide-react';
 import { Order } from '../../types';
 import { apiRequest } from '../../lib/api-client';
 import { formatCurrency, formatDate } from '../../lib/formatters';
+import { LoadingScreen } from '../../components/common/LoadingScreen';
 
 export const OrderConfirmationPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -26,11 +27,7 @@ export const OrderConfirmationPage: React.FC = () => {
   }, [id]);
 
   if (loading || !order) {
-    return (
-      <div className="max-w-3xl mx-auto px-4 py-16 flex justify-center">
-        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-emerald-500" />
-      </div>
-    );
+    return <LoadingScreen message="Loading Order Confirmation..." submessage="Verifying payment receipt and order summary" />;
   }
 
   return (

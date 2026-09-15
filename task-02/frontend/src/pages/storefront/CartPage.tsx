@@ -2,19 +2,28 @@ import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Trash2, ShoppingBag, ArrowRight, ShieldCheck } from 'lucide-react';
 import { useCart } from '../../context/CartContext';
+import { useToast } from '../../context/ToastContext';
 import { formatCurrency } from '../../lib/formatters';
+import { LoadingScreen } from '../../components/common/LoadingScreen';
 
 export const CartPage: React.FC = () => {
   const { cart, loading, updateQuantity, removeItem, clearCart } = useCart();
+  const toast = useToast();
   const navigate = useNavigate();
 
   if (loading && !cart) {
-    return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 flex justify-center">
-        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-emerald-500" />
-      </div>
-    );
+    return <LoadingScreen message="Loading Your Cart..." submessage="Syncing items and checking current inventory" />;
   }
+
+  const handleClear = async () => {
+    await clearCart();
+    toast.info('Your cart has been cleared.');
+  };
+
+  const handleRemove = async (itemId: string, name?: string) => {
+    await removeItem(itemId);
+    toast.info(name ? `Removed ${name} from cart.` : 'Item removed from cart.');
+  };
 
   const items = cart?.items || [];
   const hasItems = items.length > 0;
@@ -28,7 +37,7 @@ export const CartPage: React.FC = () => {
         {hasItems && (
           <button
             type="button"
-            onClick={() => clearCart()}
+            onClick={handleClear}
             className="text-xs text-rose-400 hover:text-rose-300 font-medium cursor-pointer"
           >
             Clear Entire Cart
@@ -99,7 +108,7 @@ export const CartPage: React.FC = () => {
 
                   <button
                     type="button"
-                    onClick={() => removeItem(item.id)}
+                    onClick={() => handleRemove(item.id, item.product.name)}
                     className="p-1.5 text-slate-500 hover:text-rose-400 transition-colors cursor-pointer"
                     title="Remove item"
                   >

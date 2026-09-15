@@ -6,12 +6,15 @@ import { apiRequest } from '../../lib/api-client';
 import { formatCurrency } from '../../lib/formatters';
 import { useCart } from '../../context/CartContext';
 import { useAuth } from '../../context/AuthContext';
+import { useToast } from '../../context/ToastContext';
+import { LoadingScreen } from '../../components/common/LoadingScreen';
 
 export const ProductDetailPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const { addItem } = useCart();
   const { user } = useAuth();
+  const toast = useToast();
 
   const [product, setProduct] = useState<Product | null>(null);
   const [quantity, setQuantity] = useState<number>(1);
@@ -36,11 +39,7 @@ export const ProductDetailPage: React.FC = () => {
   }, [slug, navigate]);
 
   if (loading || !product) {
-    return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 flex justify-center">
-        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-emerald-500" />
-      </div>
-    );
+    return <LoadingScreen message="Loading Product Details..." submessage="Fetching real-time inventory and pricing" />;
   }
 
   const isOutOfStock = product.available_stock <= 0;
@@ -48,7 +47,8 @@ export const ProductDetailPage: React.FC = () => {
 
   const handleAddToCart = async () => {
     if (!user) {
-      navigate('/login');
+      toast.info('Please sign in to add items to your cart.');
+      navigate('/login?redirect=' + encodeURIComponent(window.location.pathname));
       return;
     }
     if (isOutOfStock || adding) return;
@@ -58,9 +58,12 @@ export const ProductDetailPage: React.FC = () => {
       setErrorMsg(null);
       await addItem(product.id, quantity);
       setAdded(true);
+      toast.success(`${quantity}x ${product.name} added to cart.`);
       setTimeout(() => setAdded(false), 2000);
     } catch (err: any) {
-      setErrorMsg(err.message || 'Failed to add item to cart.');
+      const msg = err.message || 'Failed to add item to cart.';
+      setErrorMsg(msg);
+      toast.error(msg);
     } finally {
       setAdding(false);
     }

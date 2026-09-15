@@ -14,6 +14,7 @@ import {
 import { apiClient } from '../../lib/api-client';
 import { Order, OrderStatus, PaginatedResponse } from '../../types';
 import { formatCurrency, formatDate } from '../../lib/formatters';
+import { useToast } from '../../context/ToastContext';
 
 export const AdminOrdersPage: React.FC = () => {
   const [orders, setOrders] = useState<Order[]>([]);
@@ -22,6 +23,7 @@ export const AdminOrdersPage: React.FC = () => {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [statusFilter, setStatusFilter] = useState<string>('');
+  const toast = useToast();
 
   // Selected Order for Inspection / Refund
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
@@ -63,12 +65,16 @@ export const AdminOrdersPage: React.FC = () => {
       const updated = await apiClient.post<Order>(`/api/v1/admin/orders/${selectedOrder.id}/refund`, {
         reason: refundReason || 'Admin issued refund'
       });
-      setSuccessMsg(`Order #${selectedOrder.id.slice(0, 8)} successfully refunded`);
+      const msg = `Order #${selectedOrder.id.slice(0, 8)} successfully refunded`;
+      setSuccessMsg(msg);
+      toast.success(msg);
       setRefundModalOpen(false);
       setSelectedOrder(updated);
       fetchOrders();
     } catch (err: any) {
-      setActionError(err.message || 'Failed to refund order');
+      const msg = err.message || 'Failed to refund order';
+      setActionError(msg);
+      toast.error(msg);
     } finally {
       setActionLoading(false);
     }

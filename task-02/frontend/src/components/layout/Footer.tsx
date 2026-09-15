@@ -52,7 +52,7 @@ export const Footer: React.FC = () => {
               Protected by enterprise-grade encryption and secure session handling.
             </p>
             <span className="inline-block px-2.5 py-1 rounded-md bg-slate-900 border border-slate-800 text-[10px] text-slate-400 font-mono">
-              256-bit SSL | Verified Secure
+              Secure Sessions | CSRF Protected
             </span>
           </div>
         </div>

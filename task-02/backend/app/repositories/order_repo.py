@@ -39,7 +39,11 @@ class OrderRepository(BaseRepository[Order]):
     ) -> Tuple[List[Order], int]:
         q = (
             self.db.query(Order)
-            .options(joinedload(Order.items))
+            .options(
+                joinedload(Order.items),
+                joinedload(Order.reservations),
+                joinedload(Order.user)
+            )
             .filter(Order.user_id == user_id)
             .order_by(Order.created_at.desc())
         )
@@ -54,7 +58,14 @@ class OrderRepository(BaseRepository[Order]):
         skip: int = 0,
         limit: int = 20
     ) -> Tuple[List[Order], int]:
-        q = self.db.query(Order).options(joinedload(Order.items), joinedload(Order.user))
+        q = (
+            self.db.query(Order)
+            .options(
+                joinedload(Order.items),
+                joinedload(Order.user),
+                joinedload(Order.reservations)
+            )
+        )
         
         if status:
             q = q.filter(Order.status == status)

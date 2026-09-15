@@ -6,10 +6,13 @@ import { apiRequest } from '../../lib/api-client';
 import { formatCurrency, getOrderStatusColor } from '../../lib/formatters';
 import { CountdownTimer } from '../../components/common/CountdownTimer';
 import { MockPaymentSelector } from '../../components/checkout/MockPaymentSelector';
+import { LoadingScreen } from '../../components/common/LoadingScreen';
+import { useToast } from '../../context/ToastContext';
 
 export const PaymentPage: React.FC = () => {
   const { orderId } = useParams<{ orderId: string }>();
   const navigate = useNavigate();
+  const toast = useToast();
 
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
@@ -41,11 +44,7 @@ export const PaymentPage: React.FC = () => {
   }, [orderId]);
 
   if (loading || !order) {
-    return (
-      <div className="max-w-4xl mx-auto px-4 py-16 flex justify-center">
-        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-emerald-500" />
-      </div>
-    );
+    return <LoadingScreen message="Loading Order & Payment..." submessage="Initializing payment gateway & verifying item reservation" />;
   }
 
   // Active reservation expiry date
@@ -75,19 +74,24 @@ export const PaymentPage: React.FC = () => {
       });
 
       if (res.status === 'SUCCEEDED') {
+        toast.success('Payment confirmed successfully!');
         navigate(`/orders/confirmation/${order.id}`);
       } else if (res.status === 'FAILED') {
-        setErrorMessage(res.error_message || 'Payment was declined. Please check your payment details or try another card.');
+        const msg = res.error_message || 'Payment was declined. Please check your payment details or try another card.';
+        setErrorMessage(msg);
+        toast.error(msg);
         await fetchOrder();
       } else if (res.status === 'TIMEOUT') {
-        setResultMessage(
-          'Payment timed out. Your items remain held so you can retry your payment.'
-        );
+        const msg = 'Payment timed out. Your items remain held so you can retry your payment.';
+        setResultMessage(msg);
+        toast.warning(msg);
         setIdempotencyKey(`idemp_${crypto.randomUUID()}`);
         await fetchOrder();
       }
     } catch (err: any) {
-      setErrorMessage(err.message || 'Payment processing failed. Please try again.');
+      const msg = err.message || 'Payment processing failed. Please try again.';
+      setErrorMessage(msg);
+      toast.error(msg);
       await fetchOrder();
     } finally {
       setIsProcessing(false);
@@ -202,7 +206,7 @@ export const PaymentPage: React.FC = () => {
 
             <div className="flex items-center justify-center gap-2 text-[11px] text-slate-500">
               <Shield className="w-3.5 h-3.5 text-emerald-500" />
-              <span>256-bit encrypted checkout with duplicate payment protection</span>
+              <span>Duplicate payment protection enabled</span>
             </div>
           </form>
         ) : (

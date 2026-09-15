@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { ShoppingCart, Check, AlertCircle } from 'lucide-react';
 import { Product } from '../../types';
 import { formatCurrency } from '../../lib/formatters';
 import { useCart } from '../../context/CartContext';
 import { useAuth } from '../../context/AuthContext';
+import { useToast } from '../../context/ToastContext';
 
 interface ProductCardProps {
   product: Product;
@@ -13,6 +14,8 @@ interface ProductCardProps {
 export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const { addItem } = useCart();
   const { user } = useAuth();
+  const toast = useToast();
+  const navigate = useNavigate();
   const [adding, setAdding] = useState(false);
   const [added, setAdded] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -23,7 +26,8 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const handleAddToCart = async (e: React.MouseEvent) => {
     e.preventDefault();
     if (!user) {
-      window.location.href = '/login';
+      toast.info('Please sign in to add items to your cart.');
+      navigate('/login?redirect=' + encodeURIComponent(window.location.pathname));
       return;
     }
     if (isOutOfStock || adding) return;
@@ -33,9 +37,12 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       setErrorMsg(null);
       await addItem(product.id, 1);
       setAdded(true);
+      toast.success(`${product.name} added to your cart.`);
       setTimeout(() => setAdded(false), 1800);
     } catch (err: any) {
-      setErrorMsg(err.message || 'Failed to add item to cart');
+      const msg = err.message || 'Failed to add item to cart';
+      setErrorMsg(msg);
+      toast.error(msg);
       setTimeout(() => setErrorMsg(null), 3000);
     } finally {
       setAdding(false);

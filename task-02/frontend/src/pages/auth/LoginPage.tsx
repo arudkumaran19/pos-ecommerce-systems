@@ -2,10 +2,12 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ShoppingBag, Lock, Mail, AlertCircle } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import { useToast } from '../../context/ToastContext';
 
 export const LoginPage: React.FC = () => {
   const { login } = useAuth();
   const navigate = useNavigate();
+  const toast = useToast();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -18,9 +20,15 @@ export const LoginPage: React.FC = () => {
       setLoading(true);
       setError(null);
       await login(email, password);
-      navigate('/');
+      toast.success('Welcome back!');
+      // Respect redirect query param
+      const params = new URLSearchParams(window.location.search);
+      const redirect = params.get('redirect');
+      navigate(redirect || '/');
     } catch (err: any) {
-      setError(err.message || 'Authentication failed.');
+      const msg = err.message || 'Authentication failed.';
+      setError(msg);
+      toast.error(msg);
     } finally {
       setLoading(false);
     }
@@ -28,7 +36,7 @@ export const LoginPage: React.FC = () => {
 
   const handleQuickDemoAdmin = () => {
     setEmail('admin@techloom.com');
-    setPassword('AdminSecurePass123!');
+    setPassword('AdminSecurePass!2026');
   };
 
   const handleQuickDemoCustomer = () => {

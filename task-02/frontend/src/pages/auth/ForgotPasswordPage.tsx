@@ -2,12 +2,14 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Mail, CheckCircle2, ArrowLeft, AlertCircle } from 'lucide-react';
 import { apiRequest } from '../../lib/api-client';
+import { useToast } from '../../context/ToastContext';
 
 export const ForgotPasswordPage: React.FC = () => {
   const [email, setEmail] = useState('');
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const toast = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -19,8 +21,11 @@ export const ForgotPasswordPage: React.FC = () => {
         body: { email },
       });
       setSubmitted(true);
+      toast.success('Reset link dispatched if account exists.');
     } catch (err: any) {
-      setError(err.message || 'Failed to submit request.');
+      const msg = err.message || 'Failed to submit request.';
+      setError(msg);
+      toast.error(msg);
     } finally {
       setLoading(false);
     }

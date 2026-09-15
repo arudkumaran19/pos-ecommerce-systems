@@ -1,14 +1,14 @@
 from fastapi import APIRouter, Depends, Request
 from sqlalchemy.orm import Session
 from app.core.database import get_db
-from app.schemas.payment import PaymentRequest
+from app.schemas.payment import PaymentRequest, PaymentResponse
 from app.models.user import User
 from app.services.payment_service import PaymentService
 from app.api.deps import get_current_user, verify_csrf, get_idempotency_key
 
 router = APIRouter(prefix="/payments", tags=["Payment Processing"], dependencies=[Depends(verify_csrf)])
 
-@router.post("")
+@router.post("", response_model=PaymentResponse)
 def process_payment(
     data: PaymentRequest,
     request: Request,

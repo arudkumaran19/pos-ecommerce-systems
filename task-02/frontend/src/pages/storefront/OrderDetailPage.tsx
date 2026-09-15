@@ -4,10 +4,13 @@ import { ArrowLeft, Package, Clock, ShieldCheck, XCircle, CreditCard, AlertCircl
 import { Order } from '../../types';
 import { apiRequest } from '../../lib/api-client';
 import { formatCurrency, formatDate, getOrderStatusColor } from '../../lib/formatters';
+import { LoadingScreen } from '../../components/common/LoadingScreen';
+import { useToast } from '../../context/ToastContext';
 
 export const OrderDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const toast = useToast();
 
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
@@ -38,20 +41,19 @@ export const OrderDetailPage: React.FC = () => {
       setCancelling(true);
       setErrorMsg(null);
       await apiRequest(`/api/v1/orders/${order.id}/cancel`, { method: 'POST' });
+      toast.success('Order cancelled successfully.');
       await fetchOrder();
     } catch (err: any) {
-      setErrorMsg(err.message || 'Cancellation failed.');
+      const msg = err.message || 'Cancellation failed.';
+      setErrorMsg(msg);
+      toast.error(msg);
     } finally {
       setCancelling(false);
     }
   };
 
   if (loading || !order) {
-    return (
-      <div className="max-w-4xl mx-auto px-4 py-16 flex justify-center">
-        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-emerald-500" />
-      </div>
-    );
+    return <LoadingScreen message="Loading Order Details..." submessage="Fetching order status and payment information" />;
   }
 
   const canCancel = order.status === 'RESERVED' || order.status === 'PAID';

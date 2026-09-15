@@ -2,11 +2,13 @@ import React, { useState } from 'react';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { Lock, CheckCircle2, AlertCircle } from 'lucide-react';
 import { apiRequest } from '../../lib/api-client';
+import { useToast } from '../../context/ToastContext';
 
 export const ResetPasswordPage: React.FC = () => {
   const [searchParams] = useSearchParams();
   const token = searchParams.get('token') || '';
   const navigate = useNavigate();
+  const toast = useToast();
 
   const [inputToken, setInputToken] = useState(token);
   const [newPassword, setNewPassword] = useState('');
@@ -19,6 +21,7 @@ export const ResetPasswordPage: React.FC = () => {
     e.preventDefault();
     if (newPassword !== confirmPassword) {
       setError('Passwords do not match.');
+      toast.error('Passwords do not match.');
       return;
     }
 
@@ -33,9 +36,12 @@ export const ResetPasswordPage: React.FC = () => {
         },
       });
       setSuccess(true);
-      setTimeout(() => navigate('/login'), 2500);
+      toast.success('Password updated successfully. Redirecting...');
+      setTimeout(() => navigate('/login'), 2000);
     } catch (err: any) {
-      setError(err.message || 'Reset failed. Token may be invalid or expired.');
+      const msg = err.message || 'Reset failed. Token may be invalid or expired.';
+      setError(msg);
+      toast.error(msg);
     } finally {
       setLoading(false);
     }

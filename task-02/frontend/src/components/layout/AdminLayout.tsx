@@ -3,17 +3,14 @@ import { Link, Outlet, useLocation, Navigate } from 'react-router-dom';
 import { LayoutDashboard, Users, Package, ShoppingCart, ScrollText, ArrowLeft, Shield } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { Avatar } from '../common/Avatar';
+import { LoadingScreen } from '../common/LoadingScreen';
 
 export const AdminLayout: React.FC = () => {
   const { user, loading } = useAuth();
   const location = useLocation();
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-950">
-        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-indigo-500" />
-      </div>
-    );
+    return <LoadingScreen message="Loading Admin Console..." submessage="Verifying administrator privileges" />;
   }
 
   // Guard: Only ADMIN role allowed

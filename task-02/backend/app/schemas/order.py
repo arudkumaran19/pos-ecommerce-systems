@@ -44,10 +44,4 @@ class OrderResponse(BaseSchema):
 
 
 class CheckoutRequest(BaseModel):
-    shipping_address: Dict[str, Any] = Field(default_factory=lambda: {
-        "full_name": "Demo Customer",
-        "address_line1": "123 High Street",
-        "city": "London",
-        "postal_code": "SW1A 1AA",
-        "country": "UK"
-    })
+    shipping_address: Dict[str, Any] = Field(default_factory=dict)

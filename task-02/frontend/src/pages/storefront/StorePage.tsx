@@ -4,6 +4,7 @@ import { Product, PaginatedResponse } from '../../types';
 import { apiRequest } from '../../lib/api-client';
 import { ProductCard } from '../../components/storefront/ProductCard';
 import { ProductFilters } from '../../components/storefront/ProductFilters';
+import { ProductCardSkeleton } from '../../components/common/Skeleton';
 
 export const StorePage: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
@@ -83,13 +84,7 @@ export const StorePage: React.FC = () => {
       {loading ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {Array.from({ length: 8 }).map((_, idx) => (
-            <div key={idx} className="glass-card rounded-2xl p-4 h-80 animate-pulse flex flex-col justify-between">
-              <div className="w-full h-44 bg-slate-800/60 rounded-xl" />
-              <div className="space-y-2">
-                <div className="w-3/4 h-4 bg-slate-800/60 rounded" />
-                <div className="w-1/2 h-3 bg-slate-800/40 rounded" />
-              </div>
-            </div>
+            <ProductCardSkeleton key={idx} />
           ))}
         </div>
       ) : products.length > 0 ? (

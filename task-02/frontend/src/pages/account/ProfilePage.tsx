@@ -4,10 +4,12 @@ import { Camera, Trash2, CheckCircle2, AlertCircle, Shield, User as UserIcon } f
 import { useAuth } from '../../context/AuthContext';
 import { Avatar } from '../../components/common/Avatar';
 import { apiRequest } from '../../lib/api-client';
+import { useToast } from '../../context/ToastContext';
 
 export const ProfilePage: React.FC = () => {
   const { user, updateProfileName, uploadAvatar, removeAvatar, logout } = useAuth();
   const navigate = useNavigate();
+  const toast = useToast();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const [fullName, setFullName] = useState(user?.full_name || '');
@@ -28,8 +30,11 @@ export const ProfilePage: React.FC = () => {
       setFeedback(null);
       await updateProfileName(fullName);
       setFeedback({ type: 'success', text: 'Profile name updated successfully.' });
+      toast.success('Profile name updated.');
     } catch (err: any) {
-      setFeedback({ type: 'error', text: err.message || 'Failed to update name.' });
+      const msg = err.message || 'Failed to update name.';
+      setFeedback({ type: 'error', text: msg });
+      toast.error(msg);
     } finally {
       setSavingName(false);
     }
@@ -44,8 +49,11 @@ export const ProfilePage: React.FC = () => {
       setFeedback(null);
       await uploadAvatar(file);
       setFeedback({ type: 'success', text: 'Avatar uploaded and updated successfully.' });
+      toast.success('Avatar updated.');
     } catch (err: any) {
-      setFeedback({ type: 'error', text: err.message || 'Failed to upload avatar.' });
+      const msg = err.message || 'Failed to upload avatar.';
+      setFeedback({ type: 'error', text: msg });
+      toast.error(msg);
     } finally {
       setUploadingAvatar(false);
       if (fileInputRef.current) fileInputRef.current.value = '';
@@ -57,8 +65,11 @@ export const ProfilePage: React.FC = () => {
       setFeedback(null);
       await removeAvatar();
       setFeedback({ type: 'success', text: 'Avatar removed.' });
+      toast.info('Avatar removed.');
     } catch (err: any) {
-      setFeedback({ type: 'error', text: err.message || 'Failed to remove avatar.' });
+      const msg = err.message || 'Failed to remove avatar.';
+      setFeedback({ type: 'error', text: msg });
+      toast.error(msg);
     }
   };
 
@@ -69,7 +80,9 @@ export const ProfilePage: React.FC = () => {
       await logout();
       navigate('/');
     } catch (err: any) {
-      setFeedback({ type: 'error', text: err.message || 'Account deletion failed.' });
+      const msg = err.message || 'Account deletion failed.';
+      setFeedback({ type: 'error', text: msg });
+      toast.error(msg);
       setShowDeleteModal(false);
     } finally {
       setDeleting(false);

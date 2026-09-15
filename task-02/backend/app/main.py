@@ -26,7 +26,7 @@ def seed_demo_data():
             admin_user = User(
                 email="admin@techloom.com",
                 full_name="TechLoom Admin",
-                password_hash=hash_password("AdminSecurePass123!"),
+                password_hash=hash_password("AdminSecurePass!2026"),
                 role=UserRole.ADMIN,
                 is_active=True
             )

@@ -2,9 +2,11 @@ import React, { useState } from 'react';
 import { Key, Mail, CheckCircle2, AlertCircle } from 'lucide-react';
 import { apiRequest } from '../../lib/api-client';
 import { useAuth } from '../../context/AuthContext';
+import { useToast } from '../../context/ToastContext';
 
 export const SecurityPage: React.FC = () => {
   const { user, refreshProfile } = useAuth();
+  const toast = useToast();
 
   // Password change state
   const [currentPassword, setCurrentPassword] = useState('');
@@ -23,6 +25,7 @@ export const SecurityPage: React.FC = () => {
     e.preventDefault();
     if (newPassword !== confirmPassword) {
       setPwdFeedback({ type: 'error', text: 'New passwords do not match.' });
+      toast.error('New passwords do not match.');
       return;
     }
 
@@ -37,12 +40,16 @@ export const SecurityPage: React.FC = () => {
           confirm_new_password: confirmPassword,
         },
       });
-      setPwdFeedback({ type: 'success', text: 'Password updated. Other active sessions revoked.' });
+      const msg = 'Password updated. Other active sessions revoked.';
+      setPwdFeedback({ type: 'success', text: msg });
+      toast.success(msg);
       setCurrentPassword('');
       setNewPassword('');
       setConfirmPassword('');
     } catch (err: any) {
-      setPwdFeedback({ type: 'error', text: err.message || 'Failed to update password.' });
+      const msg = err.message || 'Failed to update password.';
+      setPwdFeedback({ type: 'error', text: msg });
+      toast.error(msg);
     } finally {
       setChangingPassword(false);
     }
@@ -60,12 +67,16 @@ export const SecurityPage: React.FC = () => {
           current_password: emailPassword,
         },
       });
-      setEmailFeedback({ type: 'success', text: 'Email address updated successfully.' });
+      const msg = 'Email address updated successfully.';
+      setEmailFeedback({ type: 'success', text: msg });
+      toast.success(msg);
       setNewEmail('');
       setEmailPassword('');
       await refreshProfile();
     } catch (err: any) {
-      setEmailFeedback({ type: 'error', text: err.message || 'Failed to update email.' });
+      const msg = err.message || 'Failed to update email.';
+      setEmailFeedback({ type: 'error', text: msg });
+      toast.error(msg);
     } finally {
       setChangingEmail(false);
     }
