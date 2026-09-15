@@ -31,3 +31,29 @@ dist/
 
 # Logs
 *.log
+
+# Python
+.venv/
+**/.venv/
+__pycache__/
+**/__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Environment files
+.env
+**/.env
+
+# Node
+node_modules/
+**/node_modules/
+dist/
+**/dist/
+
+# IDE
+.idea/
+**/.idea/
+
+# Runtime/generated files
+media/
+**/media/
