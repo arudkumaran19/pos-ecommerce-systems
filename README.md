@@ -1,4 +1,4 @@
-# TechLoom Software Engineer Assessment: POS & E-Commerce Systems
+# TechLoom Commerce Platform: POS & E-Commerce Systems
 
 > Two independently implemented commerce systems demonstrating inventory consistency, concurrency-safe checkout, payment lifecycle handling, authentication, authorization, and real-world e-commerce workflows.
 
@@ -24,9 +24,9 @@
 
 
 > [!NOTE]
-> **Assessment Deployment Lifecycle & Free-Tier Hosting Notice**
-> The live demonstration environments for both Task 01 (Render + Vercel) and Task 02 (Railway + Vercel) are provisioned on cloud provider evaluation tiers specifically for the TechLoom Software Engineer assessment review:
-> - **30-Day Deployment Validity:** Free-tier compute containers and cloud database instances will remain active for the assessment evaluation window (30 days from deployment).
+> **Cloud Deployment Lifecycle & Free-Tier Hosting Notice**
+> The live demonstration environments for both Task 01 (Render + Vercel) and Task 02 (Railway + Vercel) are provisioned on cloud provider evaluation tiers specifically for live public demonstration and evaluation:
+> - **30-Day Deployment Validity:** Free-tier compute containers and cloud database instances will remain active for the demonstration evaluation window (30 days from deployment).
 > - **Cold-Start Latency:** Free-tier application containers (particularly on Render and Railway) automatically spin down during periods of inactivity. If an endpoint has not received recent traffic, the initial HTTP request may experience a brief 30-50 second cold-start wake-up latency before resuming sub-second response times.
 > - **Local Reproducibility:** Full local development and containerization environments are maintained in this repository. If cloud instances expire or enter sleep mode, both systems can be launched locally with zero external network dependencies using the instructions in [Section 15: Local Development & Environment Setup](#15-local-development--environment-setup).
 
@@ -55,7 +55,7 @@
 1. [Quick Links & Live Demonstrations](#1-quick-links--live-demonstrations)
 2. [Demo Credentials](#2-demo-credentials)
 3. [Executive Summary & Architectural Independence](#3-executive-summary--architectural-independence)
-4. [Assessment Requirements Overview](#4-assessment-requirements-overview)
+4. [System Requirements Overview](#4-system-requirements-overview)
 5. [Repository Structure](#5-repository-structure)
 6. [Task 01: POS Order & Inventory System](#6-task-01-pos-order--inventory-system)
    - [Objective & Core Features](#task-01-objective--core-features)
@@ -84,7 +84,7 @@
 8. [Production Deployment Architecture](#8-production-deployment-architecture)
 9. [Technology Stack Comparison](#9-technology-stack-comparison)
 10. [Feature Comparison Matrix](#10-feature-comparison-matrix)
-11. [Assessment Requirement Traceability Matrix](#11-assessment-requirement-traceability-matrix)
+11. [System Specifications Traceability Matrix](#11-system-specifications-traceability-matrix)
 12. [Testing & Quality Verification](#12-testing--quality-verification)
 13. [Engineering Quality Pillars](#13-engineering-quality-pillars)
 14. [UI/UX Design Philosophy & Journeys](#14-uiux-design-philosophy--journeys)
@@ -101,7 +101,7 @@
 
 ## 3. Executive Summary & Architectural Independence
 
-This repository contains two independently realized commerce systems designed to fulfill the **TechLoom Software Engineer Intern Practical Assessment**:
+This repository contains two independently realized enterprise commerce systems built for modern retail POS and online storefront operations:
 
 - **Task 01 (`/task-01`):** A physical Point of Sale (POS) Order & Inventory System built for cashier checkout lanes. It focuses on low-latency terminal interactions, integer surrogate keys, integer-ordered row-level locking (`SELECT ... FOR UPDATE`), server-side sessions with bcrypt, 5-minute inventory reservation windows, and an automated background expiry service running every 5 seconds.
 - **Task 02 (`/task-02`):** A full-featured enterprise E-Commerce Platform built for public internet commerce. It features UUIDv4 primary keys, Argon2id password hashing, CSRF synchronizer tokens, transactional stock reservations with an asynchronous sweeper running every 15 seconds with `SKIP LOCKED`, distributed payment idempotency keys, structured JSONB audit logging, Resend transactional email integration, and a dual-surface UI (public boutique storefront + fixed application shell admin console).
@@ -112,7 +112,7 @@ The two tasks share zero database tables, zero backend code, zero models, and ze
 
 ```mermaid
 graph TB
-    subgraph Monorepo ["Repository Root: techloom-software-engineer-assessment"]
+    subgraph Monorepo ["Repository Root: pos-ecommerce-systems"]
         subgraph Task01 ["task-01: POS Order & Inventory System"]
             T1_FE["React 19 + Vite 8 + Tailwind v4<br/>(POS Cashier Interface)"]
             T1_BE["FastAPI + SQLAlchemy 2.0<br/>(Integer PKs + Row Locks)"]
@@ -146,9 +146,9 @@ graph TB
 
 ---
 
-## 4. Assessment Requirements Overview
+## 4. System Requirements Overview
 
-| Assessment Category | Task 01: POS Order & Inventory System | Task 02: E-Commerce Platform |
+| Feature Domain | Task 01: POS Order & Inventory System | Task 02: E-Commerce Platform |
 | :--- | :--- | :--- |
 | **Catalog & Products** | Product CRUD, price, available stock, active flag | Catalog browsing, category filtering, search, slug lookup |
 | **Stock Visibility** | Real-time stock counters on POS register | Live available stock indicators, out-of-stock badges |
@@ -168,7 +168,7 @@ graph TB
 ## 5. Repository Structure
 
 ```
-techloom-software-engineer-assessment/
+pos-ecommerce-systems/
 ├── README.md                            # Comprehensive Root Documentation (This File)
 ├── task-01/                             # Task 01: POS Order & Inventory System
 │   ├── app/
@@ -1026,9 +1026,9 @@ graph LR
 
 ---
 
-## 11. Assessment Requirement Traceability Matrix
+## 11. System Specifications Traceability Matrix
 
-| Assessment Requirement | Task | Implementation Module / File | Verification & Test Evidence |
+| System Specification | Task | Implementation Module / File | Verification & Test Evidence |
 | :--- | :---: | :--- | :--- |
 | **Product CRUD** | 01 | `task-01/app/api/products.py` | API endpoint tests in `test_api_users.py` |
 | **Prevent Overselling** | 01 | `task-01/app/services/checkout.py` | Concurrency lock in `test_checkout_service.py` |
@@ -1062,7 +1062,7 @@ python -m pytest backend/tests/ -v
 ```
 ============================= test session starts =============================
 platform win32 -- Python 3.10.11, pytest-8.3.4, pluggy-1.5.0
-rootdir: C:\Users\arudk\Downloads\techloom-software-engineer-assessment\task-02
+rootdir: /workspace/pos-ecommerce-systems/task-02
 collected 21 items
 
 backend/tests/test_admin_rbac_and_safeguards.py::test_admin_can_list_users PASSED
@@ -1128,7 +1128,7 @@ The Task 01 backend includes 7 comprehensive integration test suites (`test_api_
 
 The Task 02 user interface is crafted as a real-world commerce experience emphasizing trust, clarity, and predictable navigation:
 
-> **Design Philosophy:** The storefront is designed around clarity, trust, predictable navigation, restrained visual hierarchy, responsive behavior, and a realistic commerce flow rather than an assessment/demo interface.
+> **Design Philosophy:** The storefront is designed around clarity, trust, predictable navigation, restrained visual hierarchy, responsive behavior, and a realistic commerce flow rather than a simplified mock interface.
 
 ### Customer Journey
 ```mermaid
@@ -1387,16 +1387,16 @@ graph TD
 
 ## 22. Final Verification & Submission Report
 
-- **Documentation Scope:** Single, exhaustive, root-level `README.md` created at `C:\Users\arudk\Downloads\techloom-software-engineer-assessment\README.md`.
+- **Documentation Scope:** Single, exhaustive, root-level `README.md` documenting architecture, concurrency control, and APIs.
 - **Application Code Integrity:** Zero application code modified; documentation generated purely from verified repository facts.
 - **Diagrams Included:** 18 dedicated Mermaid diagrams covering system architecture, checkout sequences, race condition locking, reservation state machines, payment flows, database ER diagrams, idempotency workflows, authentication, and deployment topology.
 - **Automated Tests Verified:** Task 02 backend tests verified with **21 passed in 3.16s**; frontend verified with **0 compile errors, 0 lint warnings**.
 
 ---
 
-## TechLoom Assessment
+## TechLoom Commerce Suite
 
-Built as part of the TechLoom Software Engineer Intern Practical Assessment.
+Production-ready commerce systems with strict concurrency control, inventory consistency, and resilient payments.
 
 - **Monorepo Repository:** [https://github.com/arudkumaran19/pos-ecommerce-systems.git](https://github.com/arudkumaran19/pos-ecommerce-systems.git)
 - **Task 01 POS Live Application:** [https://pos-ecommerce-systems.vercel.app/](https://pos-ecommerce-systems.vercel.app/)
