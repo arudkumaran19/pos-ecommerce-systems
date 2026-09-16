@@ -12,15 +12,15 @@
 
 ## 1. Quick Links & Live Demonstrations
 
-| Project / Surface | Hosting Provider | Live URL | Credentials / Notes |
+| Task | Component | Hosting Provider | Live URL |
 | :--- | :--- | :--- | :--- |
-| **Task 01: POS Cashier Terminal** | Vercel | [pos-ecommerce-systems.vercel.app](https://pos-ecommerce-systems.vercel.app/) | Point of Sale retail interface |
-| **Task 01: Backend REST API** | Render | [techloom-pos-api.onrender.com](https://techloom-pos-api.onrender.com/) | Live POS FastAPI Backend Service |
-| **Task 02: E-Commerce Storefront** | Vercel | [pos-ecommerce-systems-zb3q.vercel.app](https://pos-ecommerce-systems-zb3q.vercel.app/) | Customer boutique & catalog browsing |
-| **Task 02: Admin Application Shell** | Vercel | [pos-ecommerce-systems-zb3q.vercel.app/admin](https://pos-ecommerce-systems-zb3q.vercel.app/admin) | `admin@techloom.com` / `AdminPass123!` |
-| **Task 02: REST API & Swagger Docs** | Railway | [pos-ecommerce-systems-production.up.railway.app/docs](https://pos-ecommerce-systems-production.up.railway.app/docs) | Interactive OpenAPI v3 Documentation |
-| **Task 02: API Health Check** | Railway | [pos-ecommerce-systems-production.up.railway.app/health](https://pos-ecommerce-systems-production.up.railway.app/health) | `{"status":"ok"}` JSON heartbeat |
-| **Source Code Repository** | GitHub | [github.com/arudkumaran19/pos-ecommerce-systems.git](https://github.com/arudkumaran19/pos-ecommerce-systems.git) | Monorepo root |
+| **Task 01: POS System** | Live Application | Vercel | [pos-ecommerce-systems.vercel.app](https://pos-ecommerce-systems.vercel.app/) |
+| **Task 01: POS System** | Backend REST API | Render | [techloom-pos-api.onrender.com](https://techloom-pos-api.onrender.com/) |
+| **Task 01: POS System** | Swagger / OpenAPI Docs | Render | [techloom-pos-api.onrender.com/docs](https://techloom-pos-api.onrender.com/docs) |
+| **Task 02: E-Commerce Platform** | Live Application | Vercel | [pos-ecommerce-systems-zb3q.vercel.app](https://pos-ecommerce-systems-zb3q.vercel.app/) |
+| **Task 02: E-Commerce Platform** | Backend REST API | Railway | [pos-ecommerce-systems-production.up.railway.app](https://pos-ecommerce-systems-production.up.railway.app) |
+| **Task 02: E-Commerce Platform** | Swagger / OpenAPI Docs | Railway | [pos-ecommerce-systems-production.up.railway.app/docs](https://pos-ecommerce-systems-production.up.railway.app/docs) |
+| **Source Code Repository** | Monorepo Git Repository | GitHub | [github.com/arudkumaran19/pos-ecommerce-systems.git](https://github.com/arudkumaran19/pos-ecommerce-systems.git) |
 
 ---
 
@@ -90,7 +90,7 @@ graph TB
         subgraph Task01 ["task-01: POS Order & Inventory System"]
             T1_FE["React 19 + Vite 8 + Tailwind v4<br/>(POS Cashier Interface)"]
             T1_BE["FastAPI + SQLAlchemy 2.0<br/>(Integer PKs + Row Locks)"]
-            T1_DB[("PostgreSQL 16 Engine<br/>Database: techloom_pos")]
+            T1_DB["("PostgreSQL 16 Engine<br/>Database: techloom_pos")"]
             T1_Worker["Asyncio Expiry Worker<br/>(Runs every 5s)"]
             
             T1_FE -->|REST + HttpOnly Cookies| T1_BE
@@ -101,7 +101,7 @@ graph TB
         subgraph Task02 ["task-02: Enterprise E-Commerce Platform"]
             T2_FE["React 19 + Vite 8 + Tailwind v3<br/>(Storefront + Admin App Shell)"]
             T2_BE["FastAPI + SQLAlchemy 2.0<br/>(UUIDv4 PKs + Argon2id + CSRF)"]
-            T2_DB[("Railway PostgreSQL<br/>Database: task02_ecommerce")]
+            T2_DB["("Railway PostgreSQL<br/>Database: task02_ecommerce")"]
             T2_Sweeper["Asyncio Sweeper Task<br/>(Runs every 15s)"]
             T2_Resend["Resend API<br/>(Password Reset Dispatch)"]
             
@@ -217,7 +217,7 @@ graph TD
         ExpirySvc["Reservation Expiry Worker<br/>(Runs every 5s)"]
     end
     
-    DB[("PostgreSQL 16<br/>techloom_pos")]
+    DB["("PostgreSQL 16<br/>techloom_pos")"]
 
     Client -->|REST + HttpOnly Cookies| API
     API --> AuthSvc
@@ -485,7 +485,7 @@ graph TD
         Alembic["Alembic Database Migrations"]
     end
 
-    Postgres[("Railway PostgreSQL Engine<br/>Database: task02_ecommerce")]
+    Postgres["("Railway PostgreSQL Engine<br/>Database: task02_ecommerce")"]
     ResendCloud["Resend Transactional Email API"]
 
     Browser --> Routing
@@ -799,21 +799,21 @@ sequenceDiagram
 
 ```mermaid
 flowchart TD
-    UserRole{User Role}
-    UserRole -- CUSTOMER --> Storefront[Storefront Catalog<br/>Cart Management<br/>Checkout & Payment<br/>Personal Order History<br/>Profile & Avatar]
-    UserRole -- ADMIN --> FullAccess[Full Customer Privileges<br/>(Admin shops with their own account)]
-    FullAccess --> AdminDashboard[Admin Dashboard & Revenue KPIs]
-    FullAccess --> AdminUsers[User Management & Role Assignment]
-    FullAccess --> AdminProducts[Product Management & Stock Updates]
-    FullAccess --> AdminOrders[Order Management & Refund Simulations]
-    FullAccess --> AdminAudit[Append-Only JSONB Audit Trail]
+    UserRole{"User Role"}
+    UserRole -- CUSTOMER --> Storefront["Storefront Catalog<br/>Cart Management<br/>Checkout & Payment<br/>Personal Order History<br/>Profile & Avatar"]
+    UserRole -- ADMIN --> FullAccess["Full Customer Privileges<br/>(Admin shops with their own account)"]
+    FullAccess --> AdminDashboard["Admin Dashboard & Revenue KPIs"]
+    FullAccess --> AdminUsers["User Management & Role Assignment"]
+    FullAccess --> AdminProducts["Product Management & Stock Updates"]
+    FullAccess --> AdminOrders["Order Management & Refund Simulations"]
+    FullAccess --> AdminAudit["Append-Only JSONB Audit Trail"]
 
     subgraph Safeguards ["Enforced Administrator Safeguards"]
-        S1[Cannot delete self]
-        S2[Cannot demote self]
-        S3[Cannot deactivate self]
-        S4[Final remaining active admin cannot be removed]
-        S5[All administrative actions generate immutable audit logs]
+        S1["Cannot delete self"]
+        S2["Cannot demote self"]
+        S3["Cannot deactivate self"]
+        S4["Final remaining active admin cannot be removed"]
+        S5["All administrative actions generate immutable audit logs"]
     end
 
     AdminUsers -.-> Safeguards
@@ -868,7 +868,7 @@ flowchart LR
     end
     
     Record --> AuditPayload
-    AuditPayload --> DB[(PostgreSQL Table: audit_logs)]
+    AuditPayload --> DB["(PostgreSQL Table: audit_logs)"]
 ```
 
 ### Task 02: API Surface Reference
@@ -931,7 +931,7 @@ graph LR
     subgraph RailwayCloud ["Railway Production PaaS (us-east-4)"]
         RailwayAPI["FastAPI Application Server<br/>Uvicorn ASGI (Python 3.10)"]
         RailwaySweeper["Async Sweeper Task<br/>(Background Event Loop 15s)"]
-        RailwayDB[("PostgreSQL 16 Engine<br/>Managed Database Storage")]
+        RailwayDB["("PostgreSQL 16 Engine<br/>Managed Database Storage")"]
     end
 
     subgraph ExternalSaaS ["Cloud Email Service"]
