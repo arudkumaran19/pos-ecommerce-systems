@@ -108,7 +108,7 @@ graph TB
         subgraph Task01 ["task-01: POS Order & Inventory System"]
             T1_FE["React 19 + Vite 8 + Tailwind v4<br/>(POS Cashier Interface)"]
             T1_BE["FastAPI + SQLAlchemy 2.0<br/>(Integer PKs + Row Locks)"]
-            T1_DB["PostgreSQL 16 Engine<br/>Database: techloom_pos"]
+            T1_DB["Render PostgreSQL 16<br/>Database: techloom_pos"]
             T1_Worker["Asyncio Expiry Worker<br/>(Runs every 5s)"]
             
             T1_FE -->|REST + HttpOnly Cookies| T1_BE
@@ -153,7 +153,7 @@ graph TB
 | **Duplicate Protection** | Unique `idempotency_key` per payment record | `IdempotencyRecord` table caching request hash & response |
 | **Order Cancellation** | Order cancellation restores reserved stock | Admin cancellation releases reservation / simulates refund |
 | **Security & Auth** | Server-side sessions, bcrypt hashing, RBAC | Argon2id hashing, CSRF headers, session tokens, RBAC |
-| **Deployment** | Vercel Frontend Deployment | Vercel Frontend + Railway Backend + Railway PostgreSQL |
+| **Deployment** | Vercel Frontend + Render Backend + Render PostgreSQL | Vercel Frontend + Railway Backend + Railway PostgreSQL |
 
 ---
 
@@ -944,6 +944,7 @@ graph LR
 
     subgraph RenderCloud ["Render Cloud Platform"]
         RenderT1["Task 01: FastAPI Backend<br/>techloom-pos-api.onrender.com"]
+        RenderDB["Render PostgreSQL 16<br/>Managed Database Storage"]
     end
 
     subgraph RailwayCloud ["Railway Production PaaS (us-east-4)"]
@@ -959,6 +960,7 @@ graph LR
     Browser -->|HTTPS| VercelT1
     Browser -->|HTTPS| VercelT2
     VercelT1 -->|HTTPS REST| RenderT1
+    RenderT1 -->|TCP 5432| RenderDB
     VercelT2 -->|HTTPS REST + Credentials| RailwayAPI
     RailwayAPI -->|Internal Async Loop| RailwaySweeper
     RailwayAPI -->|TCP 5432 / Connection Pool| RailwayDB
@@ -973,7 +975,7 @@ graph LR
 | Layer | Task 01: POS Order System | Task 02: Enterprise E-Commerce Platform |
 | :--- | :--- | :--- |
 | **Backend Framework** | FastAPI 0.141.1 (Python 3.10+) | FastAPI 0.141.1 (Python 3.10+) |
-| **Database Engine** | PostgreSQL 16 (Dockerized container) | PostgreSQL 16 (Railway Managed Cloud Database) |
+| **Database Engine** | PostgreSQL 16 (Render Cloud / Docker local) | PostgreSQL 16 (Railway Managed Cloud Database) |
 | **ORM Layer** | SQLAlchemy 2.0.52 | SQLAlchemy 2.0.53 |
 | **Database Driver** | `psycopg` (v3.2.3) | `psycopg2-binary` (v2.9.10) |
 | **Schema Migrations** | Alembic | Alembic (Full multi-revision migration history) |
@@ -987,7 +989,7 @@ graph LR
 | **Build Tooling** | Vite 8.0.0 | Vite 8.0.0 |
 | **CSS Styling** | Tailwind CSS v4.0.0 | Tailwind CSS v3.4.17 (with PostCSS & Autoprefixer) |
 | **Icon System** | Lucide React (1.16.0) | Lucide React (1.16.0) |
-| **Cloud Hosting** | Vercel (Frontend) + Render (Backend API) | Vercel (Frontend) + Railway (Backend API + Postgres) |
+| **Cloud Hosting** | Vercel (Frontend) + Render (Backend API + Render PostgreSQL) | Vercel (Frontend) + Railway (Backend API + Postgres) |
 
 ---
 
