@@ -67,9 +67,8 @@
 17. [Security Implementation Matrix](#17-security-implementation-matrix)
 18. [State Machine Comparative Analysis](#18-state-machine-comparative-analysis)
 19. [Architectural Decisions & Technical Rationales](#19-architectural-decisions--technical-rationales)
-20. [Evaluator Demo Walkthrough](#20-evaluator-demo-walkthrough)
-21. [Known Limitations & Design Boundaries](#21-known-limitations--design-boundaries)
-22. [Final Verification & Submission Report](#22-final-verification--submission-report)
+20. [Known Limitations & Design Boundaries](#20-known-limitations--design-boundaries)
+21. [Final Verification & Submission Report](#21-final-verification--submission-report)
 
 ---
 
@@ -1349,46 +1348,7 @@ graph TD
 
 ---
 
-## 20. Evaluator Demo Walkthrough
-
-An evaluator can verify all core assessment capabilities using the following structured flow:
-
-```
-1. Open Task 01 Live Application & Backend API:
-   Frontend UI: https://pos-ecommerce-systems.vercel.app/
-   Backend API: https://techloom-pos-api.onrender.com/
-   - Inspect the POS register item catalog and stock counts.
-   - Add items to the active cart.
-   - Initiate Checkout -> Verify stock decrement and reservation status.
-   - Tender Payment -> Test SUCCESS and FAILURE outcomes.
-   - Inspect Order History tab for recorded transactions.
-
-2. Open Task 02 Live Storefront:
-   URL: https://pos-ecommerce-systems-zb3q.vercel.app/
-   - Browse the catalog, filter by category, search by name.
-   - Open a product detail page and observe available stock.
-   - Add items to the cart and proceed to Checkout.
-   - Enter delivery address and submit -> Stock is locked and reserved (300s).
-   - Enter Payment details -> Submit and observe Order Confirmation.
-   - Review personal orders in the Customer Profile section.
-
-3. Open Task 02 Admin Console:
-   URL: https://pos-ecommerce-systems-zb3q.vercel.app/admin
-   Credentials: admin@techloom.com / AdminPass123!
-   - Observe Dashboard metrics: GMV, order count, and low-stock alerts.
-   - Navigate to Users: Inspect registered accounts and role assignments.
-   - Navigate to Products: Adjust product pricing and stock counts.
-   - Navigate to Orders: Select an order and execute a simulated Refund/Cancellation.
-   - Navigate to Audit Logs: Inspect the chronological trail of changes with before/after JSONB diffs.
-
-4. Inspect Task 02 Interactive OpenAPI Documentation:
-   URL: https://pos-ecommerce-systems-production.up.railway.app/docs
-   - Verify all endpoints, request schemas, and response types.
-```
-
----
-
-## 21. Known Limitations & Design Boundaries
+## 20. Known Limitations & Design Boundaries
 
 1. **Simulated Payment Gateway:** The payment processing engine simulates gateway responses (`SUCCESS`, `FAILURE`, `TIMEOUT`) to facilitate end-to-end automated testing without requiring live merchant gateway contracts (e.g. Stripe or Adyen). The state machine and idempotency behaviors are identical to production payment integrations.
 2. **Transactional Email in Local Development:** The Resend email provider requires a valid `RESEND_API_KEY`. When running locally without a configured key, password reset tokens are generated and committed to the database but email delivery is bypassed.
@@ -1396,7 +1356,7 @@ An evaluator can verify all core assessment capabilities using the following str
 
 ---
 
-## 22. Final Verification & Submission Report
+## 21. Final Verification & Submission Report
 
 - **Documentation Scope:** Single, exhaustive, root-level `README.md` created at `C:\Users\arudk\Downloads\techloom-software-engineer-assessment\README.md`.
 - **Application Code Integrity:** Zero application code modified; documentation generated purely from verified repository facts.
