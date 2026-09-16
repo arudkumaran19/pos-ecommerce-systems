@@ -22,6 +22,14 @@
 | **Task 02: E-Commerce Platform** | Swagger / OpenAPI Docs | Railway | [pos-ecommerce-systems-production.up.railway.app/docs](https://pos-ecommerce-systems-production.up.railway.app/docs) |
 | **Source Code Repository** | Monorepo Git Repository | GitHub | [github.com/arudkumaran19/pos-ecommerce-systems.git](https://github.com/arudkumaran19/pos-ecommerce-systems.git) |
 
+
+> [!NOTE]
+> **Assessment Deployment Lifecycle & Free-Tier Hosting Notice**
+> The live demonstration environments for both Task 01 (Render + Vercel) and Task 02 (Railway + Vercel) are provisioned on cloud provider evaluation tiers specifically for the TechLoom Software Engineer assessment review:
+> - **30-Day Deployment Validity:** Free-tier compute containers and cloud database instances will remain active for the assessment evaluation window (30 days from deployment).
+> - **Cold-Start Latency:** Free-tier application containers (particularly on Render and Railway) automatically spin down during periods of inactivity. If an endpoint has not received recent traffic, the initial HTTP request may experience a brief 30-50 second cold-start wake-up latency before resuming sub-second response times.
+> - **Local Reproducibility:** Full local development and containerization environments are maintained in this repository. If cloud instances expire or enter sleep mode, both systems can be launched locally with zero external network dependencies using the instructions in [Section 14: Local Development & Environment Setup](#14-local-development--environment-setup).
+
 ---
 
 ## 2. Demo Credentials
@@ -998,7 +1006,7 @@ graph LR
 | Feature / Capability | Task 01 (POS System) | Task 02 (E-Commerce Platform) |
 | :--- | :---: | :---: |
 | Product Catalog Browsing | ✓ | ✓ |
-| Product Search & Category Filters | — | ✓ |
+| Product Search & Category Filters |  -  | ✓ |
 | Product Creation & Updates | ✓ (Manager) | ✓ (Admin) |
 | Real-Time Stock Counter | ✓ | ✓ |
 | Active Shopping Cart | ✓ | ✓ |
@@ -1009,12 +1017,12 @@ graph LR
 | Payment Gateway Simulation (`SUCCESS`, `FAILURE`, `TIMEOUT`) | ✓ | ✓ |
 | Distributed Idempotency Key Guard | ✓ | ✓ (Dedicated `IdempotencyRecord` table) |
 | Order Cancellation & Stock Restoration | ✓ | ✓ |
-| Refund Simulation | — | ✓ |
+| Refund Simulation |  -  | ✓ |
 | Role-Based Access Control | ✓ (Cashier, Manager) | ✓ (Customer, Admin) |
-| Admin Application Shell Navigation | — | ✓ (Fixed 240px Shell) |
-| Structured JSONB Audit Logging | — | ✓ |
-| Transactional Password Reset Email | — | ✓ (Resend API) |
-| Avatar Image Upload | — | ✓ |
+| Admin Application Shell Navigation |  -  | ✓ (Fixed 240px Shell) |
+| Structured JSONB Audit Logging |  -  | ✓ |
+| Transactional Password Reset Email |  -  | ✓ (Resend API) |
+| Avatar Image Upload |  -  | ✓ |
 
 ---
 
