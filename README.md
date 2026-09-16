@@ -24,9 +24,28 @@
 
 ---
 
+## 2. Demo Credentials
+
+### Task 01 · POS System
+
+| Role | Email | Password |
+|---|---|---|
+| Cashier | `cashier@techloom.com` | `CashierPass123!` |
+| Manager | `manager@techloom.com` | `ManagerPass123!` |
+
+### Task 02 · E-Commerce Storefront
+
+| Role | Email | Password |
+|---|---|---|
+| Customer | `customer@techloom.com` | `CustomerPass123!` |
+| Admin | `admin@techloom.com` | `AdminSecurePass123!` |
+
+---
+
 ## Table of Contents
 
 1. [Quick Links & Live Demonstrations](#1-quick-links--live-demonstrations)
+2. [Demo Credentials](#2-demo-credentials)
 2. [Executive Summary & Architectural Independence](#2-executive-summary--architectural-independence)
 3. [Assessment Requirements Overview](#3-assessment-requirements-overview)
 4. [Repository Structure](#4-repository-structure)
@@ -89,7 +108,7 @@ graph TB
         subgraph Task01 ["task-01: POS Order & Inventory System"]
             T1_FE["React 19 + Vite 8 + Tailwind v4<br/>(POS Cashier Interface)"]
             T1_BE["FastAPI + SQLAlchemy 2.0<br/>(Integer PKs + Row Locks)"]
-            T1_DB["("PostgreSQL 16 Engine<br/>Database: techloom_pos")"]
+            T1_DB["PostgreSQL 16 Engine<br/>Database: techloom_pos"]
             T1_Worker["Asyncio Expiry Worker<br/>(Runs every 5s)"]
             
             T1_FE -->|REST + HttpOnly Cookies| T1_BE
@@ -100,7 +119,7 @@ graph TB
         subgraph Task02 ["task-02: Enterprise E-Commerce Platform"]
             T2_FE["React 19 + Vite 8 + Tailwind v3<br/>(Storefront + Admin App Shell)"]
             T2_BE["FastAPI + SQLAlchemy 2.0<br/>(UUIDv4 PKs + Argon2id + CSRF)"]
-            T2_DB["("Railway PostgreSQL<br/>Database: task02_ecommerce")"]
+            T2_DB["Railway PostgreSQL<br/>Database: task02_ecommerce"]
             T2_Sweeper["Asyncio Sweeper Task<br/>(Runs every 15s)"]
             T2_Resend["Resend API<br/>(Password Reset Dispatch)"]
             
@@ -216,7 +235,7 @@ graph TD
         ExpirySvc["Reservation Expiry Worker<br/>(Runs every 5s)"]
     end
     
-    DB["("PostgreSQL 16<br/>techloom_pos")"]
+    DB["PostgreSQL 16<br/>techloom_pos"]
 
     Client -->|REST + HttpOnly Cookies| API
     API --> AuthSvc
@@ -484,7 +503,7 @@ graph TD
         Alembic["Alembic Database Migrations"]
     end
 
-    Postgres["("Railway PostgreSQL Engine<br/>Database: task02_ecommerce")"]
+    Postgres["Railway PostgreSQL Engine<br/>Database: task02_ecommerce"]
     ResendCloud["Resend Transactional Email API"]
 
     Browser --> Routing
@@ -867,7 +886,7 @@ flowchart LR
     end
     
     Record --> AuditPayload
-    AuditPayload --> DB["(PostgreSQL Table: audit_logs)"]
+    AuditPayload --> DB["PostgreSQL Table: audit_logs"]
 ```
 
 ### Task 02: API Surface Reference
@@ -930,7 +949,7 @@ graph LR
     subgraph RailwayCloud ["Railway Production PaaS (us-east-4)"]
         RailwayAPI["FastAPI Application Server<br/>Uvicorn ASGI (Python 3.10)"]
         RailwaySweeper["Async Sweeper Task<br/>(Background Event Loop 15s)"]
-        RailwayDB["("PostgreSQL 16 Engine<br/>Managed Database Storage")"]
+        RailwayDB["PostgreSQL 16 Engine<br/>Managed Database Storage"]
     end
 
     subgraph ExternalSaaS ["Cloud Email Service"]
