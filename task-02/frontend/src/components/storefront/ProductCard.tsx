@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ShoppingCart, Check, AlertCircle } from 'lucide-react';
+import { Check } from 'lucide-react';
 import { Product } from '../../types';
-import { formatCurrency } from '../../lib/formatters';
+import { formatCurrency, formatProductName } from '../../lib/formatters';
 import { useCart } from '../../context/CartContext';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
@@ -18,15 +18,15 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const navigate = useNavigate();
   const [adding, setAdding] = useState(false);
   const [added, setAdded] = useState(false);
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   const isOutOfStock = product.available_stock <= 0;
   const isLowStock = product.available_stock > 0 && product.available_stock <= 3;
+  const displayName = formatProductName(product.name);
 
   const handleAddToCart = async (e: React.MouseEvent) => {
     e.preventDefault();
     if (!user) {
-      toast.info('Please sign in to add items to your cart.');
+      toast.info('Sign in to add items to your cart.');
       navigate('/login?redirect=' + encodeURIComponent(window.location.pathname));
       return;
     }
@@ -34,75 +34,65 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
 
     try {
       setAdding(true);
-      setErrorMsg(null);
       await addItem(product.id, 1);
       setAdded(true);
-      toast.success(`${product.name} added to your cart.`);
-      setTimeout(() => setAdded(false), 1800);
-    } catch (err: any) {
-      const msg = err.message || 'Failed to add item to cart';
-      setErrorMsg(msg);
-      toast.error(msg);
-      setTimeout(() => setErrorMsg(null), 3000);
+      toast.success(`${displayName} added to your cart.`);
+      setTimeout(() => setAdded(false), 2000);
+    } catch {
+      toast.error('Item couldn\'t be added. Please try again.');
     } finally {
       setAdding(false);
     }
   };
 
   return (
-    <div className="glass-card rounded-2xl overflow-hidden flex flex-col group transition-all duration-300">
-      {/* Image Container */}
-      <Link to={`/products/${product.slug}`} className="relative aspect-[4/3] overflow-hidden bg-slate-900 block">
+    <div className="bg-[#10131A] border border-[#242A35] rounded-xl overflow-hidden flex flex-col group transition-colors hover:border-[#323B4A]">
+      {/* Product Image */}
+      <Link to={`/products/${product.slug}`} className="relative aspect-[4/3] overflow-hidden bg-[#080A0F] block">
         <img
           src={product.image_url || 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=800'}
-          alt={product.name}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+          alt={displayName}
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
           loading="lazy"
         />
-        
+
         {/* Category Pill */}
-        <span className="absolute top-3 left-3 px-2.5 py-1 text-[11px] font-semibold tracking-wide uppercase rounded-full bg-slate-950/80 backdrop-blur-md text-slate-300 border border-white/10">
+        <span className="absolute top-3 left-3 px-2.5 py-1 text-[10px] font-medium uppercase tracking-wider rounded-md bg-[#10131A]/90 text-[#A5ABB5] border border-[#242A35]">
           {product.category}
         </span>
 
-        {/* Stock Meter Badge */}
-        <div className="absolute top-3 right-3">
-          {isOutOfStock ? (
-            <span className="px-2.5 py-1 text-[11px] font-bold tracking-wide uppercase rounded-full bg-rose-500/90 text-white shadow-md">
-              Sold Out
-            </span>
-          ) : isLowStock ? (
-            <span className="px-2.5 py-1 text-[11px] font-bold tracking-wide uppercase rounded-full bg-amber-500/90 text-slate-950 shadow-md animate-pulse">
-              Only {product.available_stock} Left
-            </span>
-          ) : (
-            <span className="px-2.5 py-1 text-[11px] font-semibold tracking-wide uppercase rounded-full bg-emerald-500/80 backdrop-blur-md text-slate-950">
-              {product.available_stock} in Stock
-            </span>
-          )}
-        </div>
+        {/* Stock Badge */}
+        {isOutOfStock ? (
+          <span className="absolute top-3 right-3 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider rounded-md bg-rose-500/90 text-white">
+            Sold out
+          </span>
+        ) : isLowStock ? (
+          <span className="absolute top-3 right-3 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider rounded-md bg-amber-500/90 text-[#080A0F]">
+            Only {product.available_stock} left
+          </span>
+        ) : null}
       </Link>
 
-      {/* Content */}
+      {/* Details */}
       <div className="p-5 flex flex-col flex-1 justify-between">
         <div>
           <Link to={`/products/${product.slug}`} className="block">
-            <h3 className="font-bold text-base text-white group-hover:text-emerald-400 transition-colors line-clamp-1">
-              {product.name}
+            <h3 className="font-semibold text-sm text-[#F5F3EE] hover:text-[#4FB7A5] transition-colors line-clamp-1 leading-snug">
+              {displayName}
             </h3>
           </Link>
-          <p className="text-xs text-slate-400 mt-1.5 line-clamp-2 leading-relaxed">
+          <p className="text-xs text-[#A5ABB5] mt-1.5 line-clamp-2 leading-relaxed">
             {product.description}
           </p>
         </div>
 
-        <div className="mt-5 pt-4 border-t border-slate-800/80 flex items-center justify-between">
+        <div className="mt-5 pt-4 border-t border-[#242A35] flex items-center justify-between">
           <div>
-            <span className="text-[10px] text-slate-500 uppercase tracking-wider block font-medium">
-              Price
-            </span>
-            <span className="text-lg font-extrabold text-white">
+            <span className="text-sm font-bold text-[#F5F3EE]">
               {formatCurrency(product.price)}
+            </span>
+            <span className="text-[11px] text-[#4FB7A5] block">
+              {isOutOfStock ? 'Unavailable' : 'In stock'}
             </span>
           </div>
 
@@ -110,34 +100,24 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             type="button"
             disabled={isOutOfStock || adding}
             onClick={handleAddToCart}
-            className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-md ${
+            className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-semibold transition-colors cursor-pointer ${
               isOutOfStock
-                ? 'bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-700/50'
+                ? 'bg-[#151922] text-[#6F7682] cursor-not-allowed border border-[#242A35]'
                 : added
-                ? 'bg-emerald-500 text-slate-950 shadow-emerald-500/20'
-                : 'bg-emerald-500 hover:bg-emerald-400 text-slate-950 hover:shadow-emerald-500/30'
+                ? 'bg-[#4FB7A5] text-[#080A0F]'
+                : 'bg-[#4FB7A5] hover:bg-[#43A090] text-[#080A0F]'
             }`}
           >
             {added ? (
               <>
-                <Check className="w-3.5 h-3.5 stroke-[3]" />
-                Added
+                <Check className="w-3.5 h-3.5 stroke-[2.5]" />
+                <span>Added</span>
               </>
             ) : (
-              <>
-                <ShoppingCart className="w-3.5 h-3.5" />
-                {isOutOfStock ? 'Unavailable' : 'Add to Cart'}
-              </>
+              <span>{isOutOfStock ? 'Sold out' : 'Add to cart'}</span>
             )}
           </button>
         </div>
-
-        {errorMsg && (
-          <div className="mt-2 text-[11px] text-rose-400 flex items-center gap-1">
-            <AlertCircle className="w-3.5 h-3.5 shrink-0" />
-            {errorMsg}
-          </div>
-        )}
       </div>
     </div>
   );

@@ -67,21 +67,21 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             <div
               key={toast.id}
               role="alert"
-              className={`pointer-events-auto flex items-start gap-3 p-4 rounded-xl shadow-2xl backdrop-blur-xl border transition-all duration-300 transform translate-y-0 animate-fade-in ${
+              className={`pointer-events-auto flex items-start gap-3 p-4 rounded-xl shadow-xl border transition-all duration-300 transform translate-y-0 animate-fade-in ${
                 isSuccess
-                  ? 'bg-slate-900/95 border-emerald-500/40 text-emerald-100 shadow-emerald-950/40'
+                  ? 'bg-[#0D1727] border-[#16B89A]/30 text-[#F5F7FA]'
                   : isError
-                  ? 'bg-slate-900/95 border-rose-500/40 text-rose-100 shadow-rose-950/40'
+                  ? 'bg-[#0D1727] border-rose-500/30 text-[#F5F7FA]'
                   : isWarning
-                  ? 'bg-slate-900/95 border-amber-500/40 text-amber-100 shadow-amber-950/40'
-                  : 'bg-slate-900/95 border-cyan-500/40 text-cyan-100 shadow-cyan-950/40'
+                  ? 'bg-[#0D1727] border-amber-500/30 text-[#F5F7FA]'
+                  : 'bg-[#0D1727] border-[#213149] text-[#F5F7FA]'
               }`}
             >
               <div className="shrink-0 mt-0.5">
-                {isSuccess && <CheckCircle2 className="w-5 h-5 text-emerald-400 animate-pulse" />}
+                {isSuccess && <CheckCircle2 className="w-5 h-5 text-[#16B89A]" />}
                 {isError && <AlertCircle className="w-5 h-5 text-rose-400" />}
                 {isWarning && <AlertTriangle className="w-5 h-5 text-amber-400" />}
-                {!isSuccess && !isError && !isWarning && <Info className="w-5 h-5 text-cyan-400" />}
+                {!isSuccess && !isError && !isWarning && <Info className="w-5 h-5 text-[#748196]" />}
               </div>
 
               <div className="flex-1 text-xs">

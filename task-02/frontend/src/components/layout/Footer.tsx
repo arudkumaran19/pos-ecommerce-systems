@@ -1,65 +1,73 @@
 import React from 'react';
-import { ShoppingBag, ShieldCheck, Lock, RefreshCw } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { ShoppingBag, Lock, ShieldCheck } from 'lucide-react';
 
 export const Footer: React.FC = () => {
   return (
-    <footer className="border-t border-slate-900 bg-slate-950/80 mt-20 text-slate-400 text-xs">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+    <footer className="border-t border-[#242A35] bg-[#080A0F] mt-24 text-[#A5ABB5] text-xs" aria-label="Footer">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-10">
+          {/* Brand Identity */}
           <div className="space-y-3">
-            <div className="flex items-center gap-2">
-              <div className="w-6 h-6 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
-                <ShoppingBag className="w-3.5 h-3.5" />
+            <div className="flex items-center gap-2.5">
+              <div className="w-7 h-7 rounded-lg bg-[#151922] border border-[#242A35] flex items-center justify-center text-[#4FB7A5]">
+                <ShoppingBag className="w-4 h-4" />
               </div>
-              <span className="text-sm font-bold text-white tracking-tight">TECHLOOM</span>
+              <span className="text-sm font-bold tracking-wider text-[#F5F3EE]">TECHLOOM</span>
             </div>
-            <p className="text-slate-500 leading-relaxed">
-              High-reliability modern gear engineered for everyday life. Guaranteed availability and secure, seamless checkout.
+            <p className="text-[#6F7682] leading-relaxed text-xs">
+              Curated everyday equipment and precision hardware designed for quiet performance and long-term durability.
             </p>
           </div>
 
+          {/* Quick Links */}
           <div>
-            <h4 className="font-semibold text-slate-200 mb-3">Guarantees</h4>
-            <ul className="space-y-2 text-slate-500">
-              <li className="flex items-center gap-2">
-                <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-                Guaranteed Item Availability
+            <h4 className="font-semibold text-[#F5F3EE] text-xs uppercase tracking-wider mb-3">Shop & Explore</h4>
+            <ul className="space-y-2 text-[#6F7682]">
+              <li>
+                <Link to="/" className="hover:text-[#F5F3EE] transition-colors">Catalogue</Link>
               </li>
-              <li className="flex items-center gap-2">
-                <Lock className="w-3.5 h-3.5 text-emerald-400" />
-                Secure, Accurate Billing
+              <li>
+                <Link to="/orders" className="hover:text-[#F5F3EE] transition-colors">Order History</Link>
               </li>
-              <li className="flex items-center gap-2">
-                <RefreshCw className="w-3.5 h-3.5 text-emerald-400" />
-                Fair Cart Holds
+              <li>
+                <Link to="/cart" className="hover:text-[#F5F3EE] transition-colors">Shopping Cart</Link>
               </li>
             </ul>
           </div>
 
+          {/* Customer Care */}
           <div>
-            <h4 className="font-semibold text-slate-200 mb-3">Storefront</h4>
-            <ul className="space-y-2 text-slate-500">
-              <li>Audio & Electronics</li>
-              <li>Minimalist Accessories</li>
-              <li>Apparel & Footwear</li>
-              <li>Home & Living</li>
+            <h4 className="font-semibold text-[#F5F3EE] text-xs uppercase tracking-wider mb-3">Account</h4>
+            <ul className="space-y-2 text-[#6F7682]">
+              <li>
+                <Link to="/profile" className="hover:text-[#F5F3EE] transition-colors">My Details</Link>
+              </li>
+              <li>
+                <Link to="/security" className="hover:text-[#F5F3EE] transition-colors">Security & Password</Link>
+              </li>
+              <li>
+                <Link to="/login" className="hover:text-[#F5F3EE] transition-colors">Sign In</Link>
+              </li>
             </ul>
           </div>
 
+          {/* Reassurance */}
           <div>
-            <h4 className="font-semibold text-slate-200 mb-3">Security</h4>
-            <p className="text-slate-500 leading-relaxed mb-2">
-              Protected by enterprise-grade encryption and secure session handling.
+            <h4 className="font-semibold text-[#F5F3EE] text-xs uppercase tracking-wider mb-3">Secure Commerce</h4>
+            <p className="text-[#6F7682] leading-relaxed text-xs mb-3">
+              Your payment details are securely processed and protected. Inventory is temporarily held during checkout to ensure availability.
             </p>
-            <span className="inline-block px-2.5 py-1 rounded-md bg-slate-900 border border-slate-800 text-[10px] text-slate-400 font-mono">
-              Secure Sessions | CSRF Protected
-            </span>
+            <div className="flex items-center gap-2 text-[11px] text-[#A5ABB5]">
+              <Lock className="w-3.5 h-3.5 text-[#4FB7A5]" />
+              <span>Secure checkout</span>
+            </div>
           </div>
         </div>
 
-        <div className="border-t border-slate-900 mt-8 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-slate-500">
-          <p>© 2026 TechLoom Inc. All rights reserved.</p>
-          <p className="text-[11px] text-slate-500">Designed for speed, reliability, and security.</p>
+        <div className="border-t border-[#1C222C] mt-12 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-[#6F7682] text-[11px]">
+          <p>© 2026 TechLoom. All rights reserved.</p>
+          <p>Modern essentials for everyday work and living.</p>
         </div>
       </div>
     </footer>

@@ -7,9 +7,9 @@ import {
   Key, 
   AlertCircle, 
   CheckCircle2, 
-  X,
-  ChevronLeft,
-  ChevronRight
+  X, 
+  ChevronLeft, 
+  ChevronRight 
 } from 'lucide-react';
 import { apiClient } from '../../lib/api-client';
 import { User, PaginatedResponse, UserRole } from '../../types';
@@ -78,11 +78,11 @@ export const AdminUsersPage: React.FC = () => {
         is_active: !selectedUser.is_active,
         reason: actionReason || (selectedUser.is_active ? 'Admin suspended user' : 'Admin activated user')
       });
-      setSuccessMsg(`User status updated to ${!selectedUser.is_active ? 'Active' : 'Suspended'}`);
+      setSuccessMsg(`Customer status updated to ${!selectedUser.is_active ? 'Active' : 'Suspended'}`);
       closeModal();
       fetchUsers();
     } catch (err: any) {
-      setActionError(err.message || 'Failed to update user status');
+      setActionError(err.message || 'Failed to update customer status');
     } finally {
       setActionLoading(false);
     }
@@ -118,7 +118,7 @@ export const AdminUsersPage: React.FC = () => {
       setSuccessMsg(`Password successfully reset for ${selectedUser.email}`);
       closeModal();
     } catch (err: any) {
-      setActionError(err.message || 'Failed to reset user password');
+      setActionError(err.message || 'Failed to reset password');
     } finally {
       setActionLoading(false);
     }
@@ -137,51 +137,51 @@ export const AdminUsersPage: React.FC = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-black text-white tracking-tight">Customer & User Directory</h1>
-          <p className="text-slate-400 text-sm mt-1">
-            Manage user accounts, roles, security status, and credentials
+          <h1 className="text-xl sm:text-2xl font-bold text-[#F5F3EE] tracking-tight">Customers</h1>
+          <p className="text-[#A5ABB5] text-xs mt-0.5">
+            Manage customer accounts, roles, and access status.
           </p>
         </div>
-        <div className="text-xs text-slate-400 bg-slate-900 px-3 py-1.5 rounded-xl border border-slate-800">
-          Total Users: <span className="font-bold text-white">{total}</span>
+        <div className="text-xs text-[#A5ABB5] bg-[#10131A] px-3 py-1.5 rounded-lg border border-[#242A35]">
+          Total customers: <span className="font-semibold text-[#F5F3EE]">{total}</span>
         </div>
       </div>
 
       {successMsg && (
-        <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-sm flex items-center justify-between">
+        <div className="p-3.5 rounded-lg bg-[#151922] border border-[#4FB7A5]/30 text-[#4FB7A5] text-xs flex items-center justify-between">
           <div className="flex items-center gap-2">
             <CheckCircle2 className="w-4 h-4 shrink-0" />
             <span>{successMsg}</span>
           </div>
-          <button onClick={() => setSuccessMsg(null)} className="text-emerald-400 hover:text-white">
+          <button onClick={() => setSuccessMsg(null)} className="text-[#A5ABB5] hover:text-[#F5F3EE]">
             <X className="w-4 h-4" />
           </button>
         </div>
       )}
 
       {/* Filters & Search */}
-      <div className="glass-card p-4 flex flex-col md:flex-row gap-3 justify-between items-center">
-        <form onSubmit={handleSearch} className="relative w-full md:w-80">
-          <Search className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
+      <div className="bg-[#10131A] p-3.5 rounded-xl border border-[#242A35] flex flex-col sm:flex-row gap-3 justify-between items-center">
+        <form onSubmit={handleSearch} className="relative w-full sm:w-80">
+          <Search className="w-3.5 h-3.5 text-[#6F7682] absolute left-3 top-1/2 -translate-y-1/2" />
           <input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search name or email..."
-            className="w-full bg-slate-900/80 border border-slate-800 rounded-xl pl-9 pr-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500"
+            placeholder="Search name or email…"
+            className="w-full bg-[#080A0F] border border-[#242A35] rounded-lg pl-9 pr-3 py-1.5 text-xs text-[#F5F3EE] placeholder-[#6F7682] focus:outline-none focus:border-[#4FB7A5]"
           />
         </form>
 
-        <div className="flex items-center gap-2.5 w-full md:w-auto">
+        <div className="flex items-center gap-2.5 w-full sm:w-auto">
           <select
             value={roleFilter}
             onChange={(e) => {
               setRoleFilter(e.target.value);
               setPage(1);
             }}
-            className="bg-slate-900 border border-slate-800 text-slate-300 text-xs rounded-xl px-3 py-2 focus:outline-none focus:border-indigo-500"
+            className="bg-[#151922] border border-[#242A35] text-[#A5ABB5] text-xs rounded-lg px-3 py-1.5 focus:outline-none focus:border-[#4FB7A5]"
           >
-            <option value="">All Roles</option>
+            <option value="">All roles</option>
             <option value="CUSTOMER">Customer</option>
             <option value="ADMIN">Admin</option>
           </select>
@@ -192,81 +192,80 @@ export const AdminUsersPage: React.FC = () => {
               setStatusFilter(e.target.value);
               setPage(1);
             }}
-            className="bg-slate-900 border border-slate-800 text-slate-300 text-xs rounded-xl px-3 py-2 focus:outline-none focus:border-indigo-500"
+            className="bg-[#151922] border border-[#242A35] text-[#A5ABB5] text-xs rounded-lg px-3 py-1.5 focus:outline-none focus:border-[#4FB7A5]"
           >
-            <option value="">All Statuses</option>
+            <option value="">All statuses</option>
             <option value="active">Active</option>
             <option value="inactive">Suspended</option>
           </select>
         </div>
       </div>
 
-      {/* Users Table */}
-      <div className="glass-card overflow-hidden">
+      {/* Customers Table */}
+      <div className="bg-[#10131A] rounded-xl border border-[#242A35] overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="border-b border-slate-800 text-[11px] font-bold text-slate-400 uppercase tracking-wider bg-slate-900/40">
-                <th className="py-3.5 px-4">User</th>
-                <th className="py-3.5 px-4">Role</th>
-                <th className="py-3.5 px-4">Status</th>
-                <th className="py-3.5 px-4">Registered</th>
-                <th className="py-3.5 px-4 text-right">Actions</th>
+              <tr className="border-b border-[#242A35] text-[11px] font-semibold text-[#A5ABB5] uppercase tracking-wider bg-[#151922]/50">
+                <th className="py-3 px-4">Customer</th>
+                <th className="py-3 px-4">Role</th>
+                <th className="py-3 px-4">Status</th>
+                <th className="py-3 px-4">Registered</th>
+                <th className="py-3 px-4 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800/60 text-xs">
+            <tbody className="divide-y divide-[#242A35] text-xs">
               {loading ? (
                 <tr>
-                  <td colSpan={5} className="py-12 text-center text-slate-400">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-500 mx-auto" />
+                  <td colSpan={5} className="py-12 text-center text-[#A5ABB5]">
+                    <div className="animate-spin rounded-full h-6 w-6 border-2 border-[#4FB7A5] border-t-transparent mx-auto" />
                   </td>
                 </tr>
               ) : users.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="py-12 text-center text-slate-400">
-                    No users found matching your search criteria.
+                  <td colSpan={5} className="py-12 text-center text-[#A5ABB5]">
+                    No customers found matching search criteria.
                   </td>
                 </tr>
               ) : (
                 users.map((u) => {
                   const isSelf = currentAdmin?.id === u.id;
                   return (
-                    <tr key={u.id} className="hover:bg-slate-900/30 transition-colors">
-                      <td className="py-3.5 px-4">
+                    <tr key={u.id} className="hover:bg-[#151922]/40 transition-colors">
+                      <td className="py-3 px-4">
                         <div className="flex items-center gap-3">
                           <Avatar url={u.avatar_url} name={u.full_name} size="sm" />
                           <div>
-                            <span className="font-bold text-white block">
-                              {u.full_name} {isSelf && <span className="text-[10px] text-indigo-400 font-normal ml-1">(You)</span>}
+                            <span className="font-semibold text-[#F5F3EE] block">
+                              {u.full_name || 'Customer'} {isSelf && <span className="text-[10px] text-[#4FB7A5] font-normal ml-1">(You)</span>}
                             </span>
-                            <span className="text-slate-400 text-[11px] block">{u.email}</span>
+                            <span className="text-[#A5ABB5] text-[11px] block">{u.email}</span>
                           </div>
                         </div>
                       </td>
-                      <td className="py-3.5 px-4">
-                        <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                      <td className="py-3 px-4">
+                        <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-medium ${
                           u.role === 'ADMIN'
-                            ? 'bg-purple-500/10 text-purple-400 border border-purple-500/20'
-                            : 'bg-indigo-500/10 text-indigo-400 border border-indigo-500/20'
+                            ? 'bg-[#151922] text-[#4FB7A5] border border-[#4FB7A5]/30'
+                            : 'bg-[#151922] text-[#A5ABB5] border border-[#242A35]'
                         }`}>
                           {u.role === 'ADMIN' && <Shield className="w-3 h-3" />}
-                          {u.role}
+                          {u.role === 'ADMIN' ? 'Admin' : 'Customer'}
                         </span>
                       </td>
-                      <td className="py-3.5 px-4">
-                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                      <td className="py-3 px-4">
+                        <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[11px] font-medium ${
                           u.is_active
-                            ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                            ? 'bg-[#151922] text-[#4FB7A5] border border-[#4FB7A5]/30'
                             : 'bg-rose-500/10 text-rose-400 border border-rose-500/20'
                         }`}>
-                          <span className={`w-1.5 h-1.5 rounded-full ${u.is_active ? 'bg-emerald-400' : 'bg-rose-400'}`} />
                           {u.is_active ? 'Active' : 'Suspended'}
                         </span>
                       </td>
-                      <td className="py-3.5 px-4 text-slate-400">
+                      <td className="py-3 px-4 text-[#A5ABB5]">
                         {formatDate(u.created_at)}
                       </td>
-                      <td className="py-3.5 px-4 text-right">
+                      <td className="py-3 px-4 text-right">
                         <div className="flex items-center justify-end gap-1.5">
                           {/* Status button */}
                           <button
@@ -275,13 +274,13 @@ export const AdminUsersPage: React.FC = () => {
                               setSelectedUser(u);
                               setModalType('status');
                             }}
-                            title={isSelf ? 'Cannot deactivate self' : u.is_active ? 'Suspend Account' : 'Activate Account'}
+                            title={isSelf ? 'Cannot deactivate self' : u.is_active ? 'Suspend account' : 'Activate account'}
                             className={`p-1.5 rounded-lg border transition-colors ${
                               isSelf
-                                ? 'opacity-30 cursor-not-allowed border-slate-800 text-slate-600'
+                                ? 'opacity-30 cursor-not-allowed border-[#242A35] text-[#6F7682]'
                                 : u.is_active
                                 ? 'border-rose-500/20 text-rose-400 hover:bg-rose-500/10'
-                                : 'border-emerald-500/20 text-emerald-400 hover:bg-emerald-500/10'
+                                : 'border-[#4FB7A5]/30 text-[#4FB7A5] hover:bg-[#4FB7A5]/10'
                             }`}
                           >
                             {u.is_active ? <UserX className="w-3.5 h-3.5" /> : <UserCheck className="w-3.5 h-3.5" />}
@@ -295,11 +294,11 @@ export const AdminUsersPage: React.FC = () => {
                               setNewRole(u.role === 'ADMIN' ? 'CUSTOMER' : 'ADMIN');
                               setModalType('role');
                             }}
-                            title={isSelf ? 'Cannot change own role' : 'Change Role'}
+                            title={isSelf ? 'Cannot change own role' : 'Change role'}
                             className={`p-1.5 rounded-lg border transition-colors ${
                               isSelf
-                                ? 'opacity-30 cursor-not-allowed border-slate-800 text-slate-600'
-                                : 'border-indigo-500/20 text-indigo-400 hover:bg-indigo-500/10'
+                                ? 'opacity-30 cursor-not-allowed border-[#242A35] text-[#6F7682]'
+                                : 'border-[#242A35] text-[#A5ABB5] hover:text-[#F5F3EE] hover:bg-[#151922]'
                             }`}
                           >
                             <Shield className="w-3.5 h-3.5" />
@@ -312,11 +311,11 @@ export const AdminUsersPage: React.FC = () => {
                               setSelectedUser(u);
                               setModalType('password');
                             }}
-                            title={isSelf ? 'Use Security settings to change your own password' : 'Admin Password Reset'}
+                            title={isSelf ? 'Use Security settings to change your own password' : 'Reset password'}
                             className={`p-1.5 rounded-lg border transition-colors ${
                               isSelf
-                                ? 'opacity-30 cursor-not-allowed border-slate-800 text-slate-600'
-                                : 'border-amber-500/20 text-amber-400 hover:bg-amber-500/10'
+                                ? 'opacity-30 cursor-not-allowed border-[#242A35] text-[#6F7682]'
+                                : 'border-[#242A35] text-[#A5ABB5] hover:text-[#F5F3EE] hover:bg-[#151922]'
                             }`}
                           >
                             <Key className="w-3.5 h-3.5" />
@@ -333,20 +332,20 @@ export const AdminUsersPage: React.FC = () => {
 
         {/* Pagination */}
         {totalPages > 1 && (
-          <div className="p-4 border-t border-slate-800/80 flex items-center justify-between text-xs text-slate-400">
+          <div className="p-3.5 border-t border-[#242A35] flex items-center justify-between text-xs text-[#A5ABB5]">
             <span>Page {page} of {totalPages}</span>
             <div className="flex items-center gap-2">
               <button
                 disabled={page <= 1}
                 onClick={() => setPage(p => p - 1)}
-                className="p-1.5 rounded-lg bg-slate-900 border border-slate-800 text-slate-300 disabled:opacity-40 hover:bg-slate-800"
+                className="p-1 rounded-lg bg-[#151922] border border-[#242A35] text-[#F5F3EE] disabled:opacity-40 hover:bg-[#1C222C]"
               >
                 <ChevronLeft className="w-4 h-4" />
               </button>
               <button
                 disabled={page >= totalPages}
                 onClick={() => setPage(p => p + 1)}
-                className="p-1.5 rounded-lg bg-slate-900 border border-slate-800 text-slate-300 disabled:opacity-40 hover:bg-slate-800"
+                className="p-1 rounded-lg bg-[#151922] border border-[#242A35] text-[#F5F3EE] disabled:opacity-40 hover:bg-[#1C222C]"
               >
                 <ChevronRight className="w-4 h-4" />
               </button>
@@ -357,122 +356,127 @@ export const AdminUsersPage: React.FC = () => {
 
       {/* Modals */}
       {modalType && selectedUser && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="glass-card max-w-md w-full p-6 border-slate-700 space-y-4">
-            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-              <h3 className="font-bold text-white text-base">
-                {modalType === 'status' && (selectedUser.is_active ? 'Suspend User' : 'Activate User')}
-                {modalType === 'role' && 'Change User Role'}
-                {modalType === 'password' && 'Administrative Password Reset'}
+        <div className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center p-4">
+          <div className="bg-[#10131A] border border-[#242A35] max-w-md w-full p-6 rounded-xl space-y-4">
+            <div className="flex items-center justify-between border-b border-[#242A35] pb-3">
+              <h3 className="font-bold text-[#F5F3EE] text-base">
+                {modalType === 'status' && (selectedUser.is_active ? 'Suspend Account' : 'Activate Account')}
+                {modalType === 'role' && 'Change Account Role'}
+                {modalType === 'password' && 'Reset Password'}
               </h3>
-              <button onClick={closeModal} className="text-slate-400 hover:text-white">
-                <X className="w-5 h-5" />
+              <button onClick={closeModal} className="text-[#A5ABB5] hover:text-[#F5F3EE]">
+                <X className="w-4 h-4" />
               </button>
             </div>
 
             {actionError && (
-              <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs flex items-center gap-2">
+              <div className="p-3 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs flex items-center gap-2">
                 <AlertCircle className="w-4 h-4 shrink-0" />
                 <span>{actionError}</span>
               </div>
             )}
 
-            <div className="text-xs text-slate-400">
-              Target User: <strong className="text-white">{selectedUser.full_name}</strong> ({selectedUser.email})
+            <div className="text-xs text-[#A5ABB5]">
+              Target: <span className="font-semibold text-[#F5F3EE]">{selectedUser.full_name} ({selectedUser.email})</span>
             </div>
 
-            {/* Status Modal Body */}
+            {/* Modal-specific forms */}
             {modalType === 'status' && (
               <div className="space-y-3">
-                <p className="text-xs text-slate-300">
+                <p className="text-xs text-[#A5ABB5]">
                   {selectedUser.is_active
-                    ? 'Are you sure you want to suspend this user? They will be immediately locked out of logging in.'
-                    : 'Reactivating this user will restore their ability to authenticate and place orders.'}
+                    ? 'Suspending this customer will prevent them from signing in and placing orders.'
+                    : 'Activating this customer will restore their store access.'}
                 </p>
                 <div>
-                  <label className="text-xs font-semibold text-slate-300 block mb-1">Reason for Audit Trail</label>
+                  <label className="text-xs font-medium text-[#A5ABB5] block mb-1">Reason</label>
                   <input
                     type="text"
                     value={actionReason}
                     onChange={(e) => setActionReason(e.target.value)}
-                    placeholder="e.g. Requested account hold / Fraud review"
-                    className="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500"
+                    placeholder="e.g. Account review"
+                    className="w-full bg-[#080A0F] border border-[#242A35] rounded-lg px-3 py-2 text-xs text-[#F5F3EE] placeholder-[#6F7682] focus:outline-none focus:border-[#4FB7A5]"
                   />
                 </div>
                 <div className="flex justify-end gap-2 pt-2">
-                  <button onClick={closeModal} className="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 text-xs font-semibold hover:bg-slate-700">Cancel</button>
+                  <button onClick={closeModal} className="px-3.5 py-1.5 rounded-lg bg-[#151922] text-[#A5ABB5] text-xs font-medium hover:text-[#F5F3EE]">
+                    Cancel
+                  </button>
                   <button
                     onClick={handleStatusToggle}
                     disabled={actionLoading}
-                    className={`px-4 py-2 rounded-xl text-white text-xs font-semibold ${selectedUser.is_active ? 'bg-rose-600 hover:bg-rose-500' : 'bg-emerald-600 hover:bg-emerald-500'}`}
+                    className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold ${
+                      selectedUser.is_active
+                        ? 'bg-rose-500 hover:bg-rose-600 text-white'
+                        : 'bg-[#4FB7A5] hover:bg-[#43A090] text-[#080A0F]'
+                    }`}
                   >
-                    {actionLoading ? 'Updating...' : selectedUser.is_active ? 'Suspend Account' : 'Activate Account'}
+                    {actionLoading ? 'Updating…' : selectedUser.is_active ? 'Suspend account' : 'Activate account'}
                   </button>
                 </div>
               </div>
             )}
 
-            {/* Role Modal Body */}
             {modalType === 'role' && (
               <div className="space-y-3">
                 <div>
-                  <label className="text-xs font-semibold text-slate-300 block mb-1">Select Role</label>
+                  <label className="text-xs font-medium text-[#A5ABB5] block mb-1">Select role</label>
                   <select
                     value={newRole}
                     onChange={(e) => setNewRole(e.target.value as UserRole)}
-                    className="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500"
+                    className="w-full bg-[#080A0F] border border-[#242A35] rounded-lg px-3 py-2 text-xs text-[#F5F3EE] focus:outline-none focus:border-[#4FB7A5]"
                   >
-                    <option value="CUSTOMER">CUSTOMER</option>
-                    <option value="ADMIN">ADMIN</option>
+                    <option value="CUSTOMER">Customer</option>
+                    <option value="ADMIN">Admin</option>
                   </select>
                 </div>
                 <div>
-                  <label className="text-xs font-semibold text-slate-300 block mb-1">Reason for Role Change</label>
+                  <label className="text-xs font-medium text-[#A5ABB5] block mb-1">Reason</label>
                   <input
                     type="text"
                     value={actionReason}
                     onChange={(e) => setActionReason(e.target.value)}
-                    placeholder="e.g. Promoted to operational admin"
-                    className="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500"
+                    placeholder="e.g. Role update"
+                    className="w-full bg-[#080A0F] border border-[#242A35] rounded-lg px-3 py-2 text-xs text-[#F5F3EE] placeholder-[#6F7682] focus:outline-none focus:border-[#4FB7A5]"
                   />
                 </div>
                 <div className="flex justify-end gap-2 pt-2">
-                  <button onClick={closeModal} className="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 text-xs font-semibold hover:bg-slate-700">Cancel</button>
+                  <button onClick={closeModal} className="px-3.5 py-1.5 rounded-lg bg-[#151922] text-[#A5ABB5] text-xs font-medium hover:text-[#F5F3EE]">
+                    Cancel
+                  </button>
                   <button
                     onClick={handleRoleChange}
                     disabled={actionLoading}
-                    className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold"
+                    className="px-3.5 py-1.5 rounded-lg bg-[#4FB7A5] hover:bg-[#43A090] text-[#080A0F] text-xs font-semibold"
                   >
-                    {actionLoading ? 'Updating...' : 'Confirm Role Change'}
+                    {actionLoading ? 'Updating…' : 'Save role'}
                   </button>
                 </div>
               </div>
             )}
 
-            {/* Password Reset Modal Body */}
             {modalType === 'password' && (
               <div className="space-y-3">
-                <p className="text-xs text-slate-300">
-                  Enter a temporary or new password for this user (minimum 8 characters).
-                </p>
                 <div>
-                  <label className="text-xs font-semibold text-slate-300 block mb-1">New Password</label>
+                  <label className="text-xs font-medium text-[#A5ABB5] block mb-1">New password (min 8 characters)</label>
                   <input
                     type="password"
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
-                    placeholder="Enter at least 8 characters..."
-                    className="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500"
+                    placeholder="••••••••••••"
+                    className="w-full bg-[#080A0F] border border-[#242A35] rounded-lg px-3 py-2 text-xs text-[#F5F3EE] placeholder-[#6F7682] focus:outline-none focus:border-[#4FB7A5]"
                   />
                 </div>
                 <div className="flex justify-end gap-2 pt-2">
-                  <button onClick={closeModal} className="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 text-xs font-semibold hover:bg-slate-700">Cancel</button>
+                  <button onClick={closeModal} className="px-3.5 py-1.5 rounded-lg bg-[#151922] text-[#A5ABB5] text-xs font-medium hover:text-[#F5F3EE]">
+                    Cancel
+                  </button>
                   <button
                     onClick={handlePasswordReset}
                     disabled={actionLoading || newPassword.length < 8}
-                    className="px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-500 text-white text-xs font-semibold disabled:opacity-50"
+                    className="px-3.5 py-1.5 rounded-lg bg-[#4FB7A5] hover:bg-[#43A090] text-[#080A0F] text-xs font-semibold disabled:opacity-50"
                   >
-                    {actionLoading ? 'Resetting...' : 'Reset Password'}
+                    {actionLoading ? 'Resetting…' : 'Reset password'}
                   </button>
                 </div>
               </div>

@@ -27,6 +27,11 @@ class Settings(BaseSettings):
     # CORS
     CORS_ORIGINS: List[str] = ["http://localhost:5173", "http://127.0.0.1:5173"]
     
+    # Transactional Email (Resend)
+    RESEND_API_KEY: str = ""
+    RESEND_FROM_EMAIL: str = "TechLoom <onboarding@resend.dev>"
+    FRONTEND_URL: str = "https://pos-ecommerce-systems-zb3q.vercel.app"
+    
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 
 settings = Settings()

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Clock, AlertTriangle } from 'lucide-react';
+import { Clock, AlertCircle } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 interface CountdownTimerProps {
   expiresAt: string;
@@ -35,52 +36,53 @@ export const CountdownTimer: React.FC<CountdownTimerProps> = ({ expiresAt, onExp
   const isCritical = secondsRemaining <= 60 && secondsRemaining > 0;
   const isExpired = secondsRemaining === 0;
 
-  // Total 5 minutes (300 seconds) progress
-  const progressPercent = Math.min(100, (secondsRemaining / 300) * 100);
+  if (isExpired) {
+    return (
+      <div className={`p-4 rounded-xl bg-[#10131A] border border-rose-500/30 text-left ${className}`}>
+        <div className="flex items-start gap-3">
+          <AlertCircle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
+          <div className="space-y-1">
+            <p className="text-xs font-semibold text-[#F5F3EE]">Your checkout has expired</p>
+            <p className="text-xs text-[#A5ABB5]">
+              Your items are no longer being held. Return to your cart to start again.
+            </p>
+            <div className="pt-2">
+              <Link
+                to="/cart"
+                className="inline-block px-3.5 py-1.5 rounded-lg bg-[#151922] border border-[#242A35] hover:border-[#4FB7A5]/50 text-xs font-medium text-[#F5F3EE] transition-colors"
+              >
+                Return to cart
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div
-      className={`p-4 rounded-xl border transition-all ${
-        isExpired
-          ? 'bg-rose-950/40 border-rose-500/40 text-rose-300'
-          : isCritical
-          ? 'bg-amber-950/40 border-amber-500/40 text-amber-300 animate-pulse'
-          : 'bg-slate-900/80 border-slate-700/60 text-slate-200'
+      className={`p-3.5 rounded-xl border transition-colors ${
+        isCritical
+          ? 'bg-[#151922] border-amber-500/40 text-amber-300'
+          : 'bg-[#10131A] border-[#242A35] text-[#A5ABB5]'
       } ${className}`}
     >
       <div className="flex items-center justify-between gap-3">
-        <div className="flex items-center gap-2">
-          {isExpired ? (
-            <AlertTriangle className="w-5 h-5 text-rose-400" />
-          ) : (
-            <Clock className={`w-5 h-5 ${isCritical ? 'text-amber-400 animate-spin' : 'text-emerald-400'}`} />
-          )}
-          <span className="text-sm font-medium">
-            {isExpired ? 'Reservation Expired' : 'Items Reserved For:'}
+        <div className="flex items-center gap-2 text-xs">
+          <Clock className={`w-3.5 h-3.5 ${isCritical ? 'text-amber-400' : 'text-[#4FB7A5]'}`} />
+          <span>
+            {isCritical ? (
+              <span className="font-medium text-amber-300">Less than a minute remaining</span>
+            ) : (
+              <span>Items held for you</span>
+            )}
           </span>
         </div>
-        <div className="font-mono text-lg font-bold tracking-wider">
+        <div className="text-xs font-semibold text-[#F5F3EE] tabular-nums">
           {formattedTime}
         </div>
       </div>
-
-      {/* Visual countdown progress bar */}
-      {!isExpired && (
-        <div className="w-full bg-slate-800/80 h-1.5 rounded-full mt-3 overflow-hidden">
-          <div
-            className={`h-full transition-all duration-1000 ${
-              isCritical ? 'bg-amber-400' : 'bg-gradient-to-r from-emerald-500 to-teal-400'
-            }`}
-            style={{ width: `${progressPercent}%` }}
-          />
-        </div>
-      )}
-
-      {isExpired && (
-        <p className="text-xs text-rose-400 mt-2">
-          Your reservation window has ended. Items have been released back to stock.
-        </p>
-      )}
     </div>
   );
 };

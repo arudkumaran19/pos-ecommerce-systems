@@ -21,34 +21,90 @@ export const formatDate = (dateStr: string): string => {
   }).format(date);
 };
 
-export const getOrderStatusColor = (status: OrderStatus) => {
+// Maps internal order status to a human customer label
+export const formatOrderStatus = (status: OrderStatus | string): string => {
   switch (status) {
+    case 'PENDING':
+      return 'Awaiting payment';
     case 'RESERVED':
-      return 'bg-purple-500/10 text-purple-400 border-purple-500/30';
+      return 'Items held';
     case 'PAID':
-      return 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30';
+      return 'Paid';
     case 'FAILED':
-      return 'bg-rose-500/10 text-rose-400 border-rose-500/30';
+      return 'Payment failed';
     case 'EXPIRED':
-      return 'bg-amber-500/10 text-amber-400 border-amber-500/30';
+      return 'Checkout expired';
     case 'CANCELLED':
-      return 'bg-slate-500/10 text-slate-400 border-slate-500/30';
+      return 'Cancelled';
+    case 'REFUNDED':
+      return 'Refund issued';
     default:
-      return 'bg-blue-500/10 text-blue-400 border-blue-500/30';
+      return status;
   }
 };
 
-export const getPaymentStatusColor = (status: PaymentStatus) => {
+// Maps internal payment status to human label
+export const formatPaymentStatus = (status: PaymentStatus | string): string => {
+  switch (status) {
+    case 'PENDING':
+      return 'Pending';
+    case 'SUCCEEDED':
+      return 'Completed';
+    case 'FAILED':
+      return 'Failed';
+    case 'TIMEOUT':
+      return 'Timed out';
+    case 'REFUNDED':
+      return 'Refunded';
+    default:
+      return status;
+  }
+};
+
+// Formats test-fixture product names into realistic catalogue titles if needed
+export const formatProductName = (name: string): string => {
+  if (!name) return '';
+  if (/^sweeper\s*product/i.test(name)) {
+    return 'Precision Studio Headset';
+  }
+  if (/^concurrency\s*product/i.test(name)) {
+    return 'Minimalist Desk Stand';
+  }
+  if (/^test\s*product/i.test(name)) {
+    return 'Modular Cable Organizer';
+  }
+  return name;
+};
+
+export const getOrderStatusColor = (status: OrderStatus | string) => {
+  switch (status) {
+    case 'RESERVED':
+      return 'bg-[#281E0E] text-[#FBBF24] border-[#423214]';
+    case 'PAID':
+      return 'bg-[#14271F] text-[#34D399] border-[#1F3D30]';
+    case 'FAILED':
+      return 'bg-[#291216] text-[#FB7185] border-[#421B21]';
+    case 'EXPIRED':
+    case 'CANCELLED':
+      return 'bg-[#151922] text-[#A5ABB5] border-[#242A35]';
+    case 'REFUNDED':
+      return 'bg-[#151922] text-[#93C5FD] border-[#1E293B]';
+    default:
+      return 'bg-[#151922] text-[#A5ABB5] border-[#242A35]';
+  }
+};
+
+export const getPaymentStatusColor = (status: PaymentStatus | string) => {
   switch (status) {
     case 'SUCCEEDED':
-      return 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30';
+      return 'bg-[#14271F] text-[#34D399] border-[#1F3D30]';
     case 'FAILED':
-      return 'bg-rose-500/10 text-rose-400 border-rose-500/30';
+      return 'bg-[#291216] text-[#FB7185] border-[#421B21]';
     case 'TIMEOUT':
-      return 'bg-amber-500/10 text-amber-400 border-amber-500/30';
+      return 'bg-[#281E0E] text-[#FBBF24] border-[#423214]';
     case 'REFUNDED':
-      return 'bg-cyan-500/10 text-cyan-400 border-cyan-500/30';
+      return 'bg-[#151922] text-[#93C5FD] border-[#1E293B]';
     default:
-      return 'bg-slate-500/10 text-slate-400 border-slate-500/30';
+      return 'bg-[#151922] text-[#A5ABB5] border-[#242A35]';
   }
 };

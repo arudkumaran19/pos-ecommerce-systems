@@ -3,8 +3,9 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Trash2, ShoppingBag, ArrowRight, ShieldCheck } from 'lucide-react';
 import { useCart } from '../../context/CartContext';
 import { useToast } from '../../context/ToastContext';
-import { formatCurrency } from '../../lib/formatters';
+import { formatCurrency, formatProductName } from '../../lib/formatters';
 import { LoadingScreen } from '../../components/common/LoadingScreen';
+import { CheckoutProgress, CHECKOUT_STEPS } from '../../components/checkout/CheckoutProgress';
 
 export const CartPage: React.FC = () => {
   const { cart, loading, updateQuantity, removeItem, clearCart } = useCart();
@@ -12,7 +13,7 @@ export const CartPage: React.FC = () => {
   const navigate = useNavigate();
 
   if (loading && !cart) {
-    return <LoadingScreen message="Loading Your Cart..." submessage="Syncing items and checking current inventory" />;
+    return <LoadingScreen message="Loading your bag…" submessage="Updating available items and totals" />;
   }
 
   const handleClear = async () => {
@@ -22,86 +23,100 @@ export const CartPage: React.FC = () => {
 
   const handleRemove = async (itemId: string, name?: string) => {
     await removeItem(itemId);
-    toast.info(name ? `Removed ${name} from cart.` : 'Item removed from cart.');
+    toast.info(name ? `Removed ${formatProductName(name)} from cart.` : 'Item removed from cart.');
   };
 
   const items = cart?.items || [];
   const hasItems = items.length > 0;
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="max-w-4xl mx-auto px-4 sm:px-6 py-10">
+      {/* Checkout Progress */}
+      <div className="mb-10">
+        <CheckoutProgress steps={CHECKOUT_STEPS} currentStep={1} />
+      </div>
+
       <div className="flex items-center justify-between mb-8">
-        <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
-          Your Shopping Cart
-        </h1>
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-bold text-[#F5F3EE] tracking-tight">
+            Shopping Cart
+          </h1>
+          {hasItems && (
+            <p className="text-xs text-[#A5ABB5] mt-1">
+              {items.length} item{items.length !== 1 ? 's' : ''} in your cart
+            </p>
+          )}
+        </div>
         {hasItems && (
           <button
             type="button"
             onClick={handleClear}
-            className="text-xs text-rose-400 hover:text-rose-300 font-medium cursor-pointer"
+            className="text-xs text-[#6F7682] hover:text-rose-400 font-medium cursor-pointer transition-colors"
           >
-            Clear Entire Cart
+            Clear cart
           </button>
         )}
       </div>
 
       {hasItems ? (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* Cart Items List */}
-          <div className="lg:col-span-2 space-y-4">
+          <div className="md:col-span-2 space-y-3">
             {items.map((item) => (
               <div
                 key={item.id}
-                className="glass-panel p-4 sm:p-5 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border border-slate-800"
+                className="bg-[#10131A] border border-[#242A35] p-5 rounded-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 transition-colors hover:border-[#323B4A]"
               >
                 <div className="flex items-center gap-4">
                   <img
                     src={item.product.image_url || 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=800'}
-                    alt={item.product.name}
-                    className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl object-cover bg-slate-900 shrink-0"
+                    alt={formatProductName(item.product.name)}
+                    className="w-16 h-16 rounded-lg object-cover bg-[#080A0F] shrink-0 border border-[#242A35]"
                   />
                   <div>
                     <Link
                       to={`/products/${item.product.slug}`}
-                      className="font-bold text-white text-sm sm:text-base hover:text-emerald-400 transition-colors line-clamp-1"
+                      className="font-medium text-[#F5F3EE] text-sm hover:text-[#4FB7A5] transition-colors line-clamp-1"
                     >
-                      {item.product.name}
+                      {formatProductName(item.product.name)}
                     </Link>
-                    <span className="text-xs text-slate-400 block mt-0.5">
+                    <span className="text-xs text-[#A5ABB5] block mt-0.5">
                       {formatCurrency(item.unit_price)} each
                     </span>
-                    <span className="text-[11px] text-emerald-400 block mt-1">
-                      {item.product.available_stock} in stock
+                    <span className="text-[11px] text-[#4FB7A5] block mt-0.5">
+                      In stock
                     </span>
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between sm:justify-end gap-6 w-full sm:w-auto pt-3 sm:pt-0 border-t sm:border-0 border-slate-800">
+                <div className="flex items-center justify-between sm:justify-end gap-5 w-full sm:w-auto pt-3 sm:pt-0 border-t sm:border-0 border-[#242A35]">
                   {/* Quantity Spinner */}
-                  <div className="flex items-center border border-slate-700 bg-slate-900 rounded-xl overflow-hidden">
+                  <div className="flex items-center border border-[#242A35] bg-[#080A0F] rounded-lg overflow-hidden">
                     <button
                       type="button"
                       disabled={item.quantity <= 1}
                       onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                      className="px-2.5 py-1 text-slate-400 hover:text-white disabled:opacity-40"
+                      className="px-2.5 py-1 text-xs text-[#A5ABB5] hover:text-[#F5F3EE] disabled:opacity-40 transition-colors cursor-pointer"
+                      aria-label="Decrease quantity"
                     >
-                      -
+                      −
                     </button>
-                    <span className="px-2 text-xs font-bold text-white min-w-[1.75rem] text-center">
+                    <span className="px-2 text-xs font-medium text-[#F5F3EE] min-w-[1.5rem] text-center tabular-nums">
                       {item.quantity}
                     </span>
                     <button
                       type="button"
                       disabled={item.quantity >= item.product.available_stock}
                       onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                      className="px-2.5 py-1 text-slate-400 hover:text-white disabled:opacity-40"
+                      className="px-2.5 py-1 text-xs text-[#A5ABB5] hover:text-[#F5F3EE] disabled:opacity-40 transition-colors cursor-pointer"
+                      aria-label="Increase quantity"
                     >
                       +
                     </button>
                   </div>
 
                   <div className="text-right">
-                    <span className="text-sm font-extrabold text-white block">
+                    <span className="text-sm font-semibold text-[#F5F3EE] block tabular-nums">
                       {formatCurrency(item.subtotal)}
                     </span>
                   </div>
@@ -109,8 +124,9 @@ export const CartPage: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => handleRemove(item.id, item.product.name)}
-                    className="p-1.5 text-slate-500 hover:text-rose-400 transition-colors cursor-pointer"
+                    className="p-1.5 text-[#6F7682] hover:text-rose-400 transition-colors cursor-pointer"
                     title="Remove item"
+                    aria-label={`Remove ${formatProductName(item.product.name)}`}
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>
@@ -120,56 +136,54 @@ export const CartPage: React.FC = () => {
           </div>
 
           {/* Cart Summary */}
-          <div className="lg:col-span-1">
-            <div className="glass-panel p-6 rounded-2xl border border-slate-800 sticky top-24 space-y-6">
-              <h2 className="text-base font-bold text-white">Order Summary</h2>
+          <div className="md:col-span-1">
+            <div className="bg-[#10131A] border border-[#242A35] p-6 rounded-xl sticky top-24 space-y-5">
+              <h2 className="text-sm font-bold text-[#F5F3EE]">Order summary</h2>
 
-              <div className="space-y-3 text-sm">
-                <div className="flex justify-between text-slate-400">
+              <div className="space-y-2.5 text-xs">
+                <div className="flex justify-between text-[#A5ABB5]">
                   <span>Subtotal</span>
-                  <span className="font-semibold text-white">{formatCurrency(cart?.subtotal || '0')}</span>
+                  <span className="font-medium text-[#F5F3EE] tabular-nums">{formatCurrency(cart?.subtotal || '0')}</span>
                 </div>
-                <div className="flex justify-between text-slate-400">
-                  <span>Estimated Shipping</span>
-                  <span className="font-semibold text-emerald-400">FREE</span>
+                <div className="flex justify-between text-[#A5ABB5]">
+                  <span>Delivery</span>
+                  <span className="font-medium text-[#4FB7A5]">Free</span>
                 </div>
-                <div className="border-t border-slate-800 pt-3 flex justify-between text-base font-extrabold text-white">
-                  <span>Total Due</span>
-                  <span>{formatCurrency(cart?.subtotal || '0')}</span>
+                <div className="border-t border-[#242A35] pt-3 flex justify-between text-sm font-bold text-[#F5F3EE]">
+                  <span>Total</span>
+                  <span className="tabular-nums">{formatCurrency(cart?.subtotal || '0')}</span>
                 </div>
               </div>
 
-              <div className="p-3 bg-slate-900/80 rounded-xl border border-slate-800/80 text-[11px] text-slate-400 flex items-start gap-2">
-                <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
-                <span>
-                  Your items are held for 5 minutes during checkout.
-                </span>
+              <div className="p-3 bg-[#151922] rounded-lg border border-[#242A35] text-[11px] text-[#A5ABB5] flex items-start gap-2">
+                <ShieldCheck className="w-4 h-4 text-[#4FB7A5] shrink-0 mt-0.5" />
+                <span>Your items are held for you while you complete checkout.</span>
               </div>
 
               <button
                 type="button"
                 onClick={() => navigate('/checkout')}
-                className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-sm shadow-lg shadow-emerald-500/20 transition-all cursor-pointer"
+                className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-lg bg-[#4FB7A5] hover:bg-[#43A090] text-[#080A0F] font-semibold text-xs transition-colors cursor-pointer"
               >
-                Proceed to Checkout
-                <ArrowRight className="w-4 h-4" />
+                <span>Continue to Delivery</span>
+                <ArrowRight className="w-3.5 h-3.5" />
               </button>
             </div>
           </div>
         </div>
       ) : (
-        <div className="text-center py-20 glass-panel rounded-3xl border border-slate-800 max-w-lg mx-auto">
-          <ShoppingBag className="w-12 h-12 text-slate-600 mx-auto mb-4" />
-          <h2 className="text-lg font-bold text-white">Your cart is empty</h2>
-          <p className="text-xs text-slate-400 mt-1 mb-6">
-            Explore our curated catalog and discover high-performance electronics and accessories.
+        <div className="text-center py-16 bg-[#10131A] rounded-xl border border-[#242A35] max-w-md mx-auto">
+          <ShoppingBag className="w-10 h-10 text-[#6F7682] mx-auto mb-3" />
+          <h2 className="text-base font-bold text-[#F5F3EE]">Your cart is empty</h2>
+          <p className="text-xs text-[#A5ABB5] mt-1 mb-6">
+            Explore our collection to find products.
           </p>
           <Link
             to="/"
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-bold transition-all shadow-md"
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-[#4FB7A5] hover:bg-[#43A090] text-[#080A0F] text-xs font-semibold transition-colors"
           >
-            Start Shopping
-            <ArrowRight className="w-4 h-4" />
+            <span>Continue shopping</span>
+            <ArrowRight className="w-3.5 h-3.5" />
           </Link>
         </div>
       )}

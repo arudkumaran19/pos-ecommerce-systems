@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Sparkles, ShoppingBag } from 'lucide-react';
+import { Truck, ShieldCheck, RefreshCw } from 'lucide-react';
 import { Product, PaginatedResponse } from '../../types';
 import { apiRequest } from '../../lib/api-client';
 import { ProductCard } from '../../components/storefront/ProductCard';
@@ -35,7 +35,7 @@ export const StorePage: React.FC = () => {
           setCategories(unique);
         }
       } catch (err) {
-        console.error('Failed to load catalog products', err);
+        console.error('Failed to load products', err);
       } finally {
         setLoading(false);
       }
@@ -43,27 +43,42 @@ export const StorePage: React.FC = () => {
 
     const debounce = setTimeout(() => {
       fetchProducts();
-    }, 250);
+    }, 200);
 
     return () => clearTimeout(debounce);
   }, [search, category, inStockOnly, sortBy]);
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      {/* Hero Banner */}
-      <div className="relative rounded-3xl overflow-hidden glass-panel p-8 md:p-12 mb-12 border border-slate-800/80 shadow-2xl">
-        <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/10 via-teal-500/5 to-transparent pointer-events-none" />
-        <div className="relative z-10 max-w-2xl">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-semibold mb-4">
-            <Sparkles className="w-3.5 h-3.5" />
-            Exclusive Modern Collection
-          </div>
-          <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-white leading-tight">
-            Curated Gear, <span className="text-gradient">Ready When You Are</span>
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+      {/* Restrained Editorial Hero Banner */}
+      <div className="rounded-2xl bg-[#10131A] p-8 md:p-12 mb-10 border border-[#242A35]">
+        <div className="max-w-2xl">
+          <span className="text-xs font-semibold uppercase tracking-wider text-[#4FB7A5] block mb-3">
+            TechLoom Collection
+          </span>
+
+          <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-[#F5F3EE] leading-tight">
+            Refined tools for focused work.
           </h1>
-          <p className="mt-4 text-sm sm:text-base text-slate-400 leading-relaxed">
-            Experience guaranteed availability, seamless checkout, and secure order processing.
+
+          <p className="mt-3 text-xs sm:text-sm text-[#A5ABB5] leading-relaxed">
+            Thoughtfully designed hardware and desk accessories crafted for longevity, precision, and everyday utility.
           </p>
+
+          <div className="mt-6 flex flex-wrap items-center gap-5 text-xs text-[#A5ABB5] pt-4 border-t border-[#242A35]">
+            <div className="flex items-center gap-2">
+              <Truck className="w-3.5 h-3.5 text-[#4FB7A5]" />
+              <span>Free delivery</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <ShieldCheck className="w-3.5 h-3.5 text-[#4FB7A5]" />
+              <span>2-year warranty</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <RefreshCw className="w-3.5 h-3.5 text-[#4FB7A5]" />
+              <span>30-day returns</span>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -82,24 +97,21 @@ export const StorePage: React.FC = () => {
 
       {/* Product Grid */}
       {loading ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {Array.from({ length: 8 }).map((_, idx) => (
             <ProductCardSkeleton key={idx} />
           ))}
         </div>
       ) : products.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {products.map((product) => (
             <ProductCard key={product.id} product={product} />
           ))}
         </div>
       ) : (
-        <div className="text-center py-20 glass-panel rounded-2xl border border-slate-800">
-          <ShoppingBag className="w-12 h-12 text-slate-600 mx-auto mb-3" />
-          <h3 className="text-base font-bold text-white">No products found</h3>
-          <p className="text-xs text-slate-400 mt-1">
-            Try adjusting your search query, price filter, or category selection.
-          </p>
+        <div className="text-center py-20 bg-[#10131A] rounded-2xl border border-[#242A35] max-w-md mx-auto">
+          <p className="text-sm font-semibold text-[#F5F3EE]">No products found</p>
+          <p className="text-xs text-[#A5ABB5] mt-1">Try adjusting your search or filters.</p>
         </div>
       )}
     </div>

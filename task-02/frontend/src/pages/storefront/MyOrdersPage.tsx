@@ -1,15 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Package, ArrowRight, XCircle, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { AlertCircle, CheckCircle2 } from 'lucide-react';
 import { Order, PaginatedResponse } from '../../types';
 import { apiRequest } from '../../lib/api-client';
-import { formatCurrency, formatDate, getOrderStatusColor } from '../../lib/formatters';
+import { formatCurrency, formatDate, formatOrderStatus, getOrderStatusColor } from '../../lib/formatters';
 import { useToast } from '../../context/ToastContext';
 
 export const MyOrdersPage: React.FC = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
-  const [cancellingId, setCancellingId] = useState<string | null>(null);
   const [feedbackMsg, setFeedbackMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const toast = useToast();
 
@@ -29,50 +28,22 @@ export const MyOrdersPage: React.FC = () => {
     fetchOrders();
   }, []);
 
-  const handleCancelOrder = async (orderId: string) => {
-    if (!window.confirm('Are you sure you want to cancel this order?')) {
-      return;
-    }
-
-    try {
-      setCancellingId(orderId);
-      setFeedbackMsg(null);
-      await apiRequest(`/api/v1/orders/${orderId}/cancel`, { method: 'POST' });
-      const msg = 'Order cancelled successfully.';
-      setFeedbackMsg({
-        type: 'success',
-        text: msg,
-      });
-      toast.success(msg);
-      await fetchOrders();
-    } catch (err: any) {
-      const msg = err.message || 'Failed to cancel order.';
-      setFeedbackMsg({
-        type: 'error',
-        text: msg,
-      });
-      toast.error(msg);
-    } finally {
-      setCancellingId(null);
-    }
-  };
-
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
       <div className="mb-8">
-        <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
-          Order History
+        <h1 className="text-2xl sm:text-3xl font-bold text-[#F5F3EE] tracking-tight">
+          My Orders
         </h1>
-        <p className="text-xs text-slate-400 mt-1">
-          Review your past orders, track delivery status, and manage purchases.
+        <p className="text-xs text-[#A5ABB5] mt-1">
+          Review your past purchases and check delivery status.
         </p>
       </div>
 
       {feedbackMsg && (
         <div
-          className={`p-4 rounded-xl text-xs mb-6 flex items-center gap-2 ${
+          className={`p-3.5 rounded-lg text-xs mb-6 flex items-center gap-2.5 ${
             feedbackMsg.type === 'success'
-              ? 'bg-emerald-500/10 border border-emerald-500/30 text-emerald-300'
+              ? 'bg-[#151922] border border-[#4FB7A5]/30 text-[#4FB7A5]'
               : 'bg-rose-500/10 border border-rose-500/30 text-rose-300'
           }`}
         >
@@ -86,100 +57,68 @@ export const MyOrdersPage: React.FC = () => {
       )}
 
       {loading ? (
-        <div className="space-y-4">
-          {Array.from({ length: 4 }).map((_, idx) => (
-            <div key={idx} className="glass-panel p-6 rounded-2xl animate-pulse h-28" />
+        <div className="space-y-3">
+          {Array.from({ length: 3 }).map((_, idx) => (
+            <div key={idx} className="bg-[#10131A] border border-[#242A35] p-5 rounded-xl animate-pulse h-24" />
           ))}
         </div>
       ) : orders.length > 0 ? (
-        <div className="space-y-4">
+        <div className="space-y-3">
           {orders.map((order) => {
-            const canCancel = order.status === 'RESERVED' || order.status === 'PAID';
+            const shortId = order.id.slice(0, 8);
+            const totalItems = order.items.reduce((acc, item) => acc + item.quantity, 0);
+
             return (
               <div
                 key={order.id}
-                className="glass-panel p-5 sm:p-6 rounded-2xl border border-slate-800 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 transition-all hover:border-slate-700"
+                className="bg-[#10131A] border border-[#242A35] p-5 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-colors hover:border-[#323B4A]"
               >
-                <div className="space-y-1.5 flex-1">
-                  <div className="flex items-center gap-3">
-                    <span className="font-mono text-xs font-semibold text-white">
-                      #{order.id.slice(0, 8)}
+                <div>
+                  <div className="flex items-center gap-2.5">
+                    <span className="font-semibold text-sm text-[#F5F3EE]">
+                      Order #{shortId}
                     </span>
                     <span
-                      className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border ${getOrderStatusColor(
+                      className={`px-2 py-0.5 rounded-md text-[11px] font-medium border ${getOrderStatusColor(
                         order.status
                       )}`}
                     >
-                      {order.status}
-                    </span>
-                    <span className="text-xs text-slate-500">
-                      {formatDate(order.created_at)}
+                      {formatOrderStatus(order.status)}
                     </span>
                   </div>
-
-                  <p className="text-xs text-slate-300">
-                    {order.items.map((i) => `${i.product_name} (×${i.quantity})`).join(', ')}
-                  </p>
+                  <div className="text-xs text-[#A5ABB5] mt-1.5 flex items-center gap-3">
+                    <span>{formatDate(order.created_at)}</span>
+                    <span>•</span>
+                    <span>{totalItems} {totalItems === 1 ? 'item' : 'items'}</span>
+                  </div>
                 </div>
 
-                <div className="flex items-center gap-6 w-full md:w-auto justify-between md:justify-end border-t md:border-0 border-slate-800 pt-3 md:pt-0">
-                  <div className="text-left md:text-right">
-                    <span className="text-[10px] text-slate-500 uppercase block font-medium">
-                      Order Total
-                    </span>
-                    <span className="text-base font-extrabold text-white">
-                      {formatCurrency(order.total)}
-                    </span>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <Link
-                      to={`/orders/${order.id}`}
-                      className="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold flex items-center gap-1"
-                    >
-                      Details
-                      <ArrowRight className="w-3.5 h-3.5" />
-                    </Link>
-
-                    {order.status === 'RESERVED' && (
-                      <Link
-                        to={`/payment/${order.id}`}
-                        className="px-3 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-bold shadow-sm"
-                      >
-                        Complete Payment
-                      </Link>
-                    )}
-
-                    {canCancel && (
-                      <button
-                        type="button"
-                        disabled={cancellingId === order.id}
-                        onClick={() => handleCancelOrder(order.id)}
-                        className="px-3 py-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 text-xs font-semibold flex items-center gap-1 cursor-pointer disabled:opacity-50"
-                      >
-                        <XCircle className="w-3.5 h-3.5" />
-                        {order.status === 'PAID' ? 'Refund' : 'Cancel'}
-                      </button>
-                    )}
-                  </div>
+                <div className="flex items-center justify-between sm:justify-end gap-5 pt-3 sm:pt-0 border-t sm:border-0 border-[#242A35]">
+                  <span className="text-sm font-bold text-[#F5F3EE] tabular-nums">
+                    {formatCurrency(order.total)}
+                  </span>
+                  <Link
+                    to={`/orders/${order.id}`}
+                    className="px-3.5 py-1.5 rounded-lg bg-[#151922] border border-[#242A35] hover:border-[#4FB7A5]/50 text-xs font-medium text-[#F5F3EE] transition-colors"
+                  >
+                    View order
+                  </Link>
                 </div>
               </div>
             );
           })}
         </div>
       ) : (
-        <div className="text-center py-20 glass-panel rounded-3xl border border-slate-800 max-w-lg mx-auto">
-          <Package className="w-12 h-12 text-slate-600 mx-auto mb-4" />
-          <h3 className="text-base font-bold text-white">No historical orders</h3>
-          <p className="text-xs text-slate-400 mt-1 mb-6">
-            You have not placed any orders yet.
+        <div className="text-center py-16 bg-[#10131A] rounded-xl border border-[#242A35]">
+          <p className="text-sm font-semibold text-[#F5F3EE]">No orders yet</p>
+          <p className="text-xs text-[#A5ABB5] mt-1 mb-5">
+            When you complete a purchase, your orders will appear here.
           </p>
           <Link
             to="/"
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-500 text-slate-950 text-xs font-bold"
+            className="inline-block px-4 py-2 rounded-lg bg-[#4FB7A5] hover:bg-[#43A090] text-[#080A0F] text-xs font-semibold transition-colors"
           >
-            Start Shopping
-            <ArrowRight className="w-4 h-4" />
+            Start shopping
           </Link>
         </div>
       )}

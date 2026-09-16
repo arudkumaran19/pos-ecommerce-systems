@@ -1,83 +1,94 @@
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --app-bg: #080A0F;
+  --app-surface: #10131A;
+  --app-surface-elevated: #151922;
+  --app-border: #242A35;
+  --app-border-subtle: #1C222C;
+  --app-text: #F5F3EE;
+  --app-text-secondary: #A5ABB5;
+  --app-text-muted: #6F7682;
+  --app-accent: #4FB7A5;
+  --app-accent-hover: #429E8E;
+}
+
 @layer base {
   body {
-    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
-    @apply bg-slate-950 text-slate-100 antialiased min-h-screen selection:bg-emerald-500 selection:text-white;
+    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    background-color: #080A0F;
+    color: #F5F3EE;
+    min-height: 100dvh;
+    @apply antialiased selection:bg-[#4FB7A5] selection:text-[#080A0F];
     overflow-x: hidden;
   }
 
-  /* Custom Scrollbar */
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    font-weight: 600;
+    letter-spacing: -0.015em;
+  }
+
+  /* Quiet Custom Scrollbar */
   ::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
+    width: 6px;
+    height: 6px;
   }
 
   ::-webkit-scrollbar-track {
-    background: #020617;
+    background: #080A0F;
   }
 
   ::-webkit-scrollbar-thumb {
-    background: #1e293b;
-    border-radius: 4px;
+    background: #1C222C;
+    border-radius: 3px;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    background: #334155;
+    background: #242A35;
   }
 }
 
-/* Glassmorphism and Custom Utilities */
+/* Restrained Surface Tokens */
+.surface-card {
+  background-color: #10131A;
+  border: 1px solid #242A35;
+  border-radius: 12px;
+}
+
+.surface-elevated {
+  background-color: #151922;
+  border: 1px solid #242A35;
+  border-radius: 12px;
+}
+
+/* Fallback for legacy class references */
 .glass-panel {
-  background: rgba(15, 23, 42, 0.75);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background-color: #10131A;
+  border: 1px solid #242A35;
+  border-radius: 12px;
 }
 
 .glass-card {
-  background: rgba(30, 41, 59, 0.5);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  background-color: #10131A;
+  border: 1px solid #242A35;
+  border-radius: 12px;
+  transition: border-color 0.15s ease;
 }
 
 .glass-card:hover {
-  border-color: rgba(34, 197, 94, 0.35);
-  box-shadow: 0 12px 32px -8px rgba(34, 197, 94, 0.12);
-  transform: translateY(-2px);
+  border-color: #384252;
 }
 
-.glass-dropdown {
-  background: rgba(15, 23, 42, 0.95);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.5);
-}
-
-.text-gradient {
-  background: linear-gradient(135deg, #4ade80 0%, #38bdf8 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-.text-gradient-gold {
-  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-/* Animations */
+/* Simple fade transition */
 @keyframes fadeIn {
   from {
     opacity: 0;
-    transform: translateY(6px);
+    transform: translateY(3px);
   }
   to {
     opacity: 1;
@@ -86,18 +97,14 @@
 }
 
 .animate-fade-in {
-  animation: fadeIn 0.25s ease-out forwards;
+  animation: fadeIn 0.15s ease-out forwards;
 }
 
-@keyframes floatSlow {
-  0%, 100% {
-    transform: translateY(0);
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
-  50% {
-    transform: translateY(-6px);
-  }
-}
-
-.animate-float {
-  animation: floatSlow 4s ease-in-out infinite;
 }

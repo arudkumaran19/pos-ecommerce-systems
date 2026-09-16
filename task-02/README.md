@@ -4,6 +4,39 @@
 
 ---
 
+## Live Deployment Links
+- **Live Frontend:** https://pos-ecommerce-systems-zb3q.vercel.app
+- **Live Backend:** https://pos-ecommerce-systems-production.up.railway.app
+- **Repository:** https://github.com/arudkumaran19/pos-ecommerce-systems
+
+## Demo Credentials
+### Task 02 Admin:
+- **Email:** `admin@techloom.com`
+- **Password:** `AdminSecurePass!2026`
+
+*Note: The admin account can use the normal storefront as a customer and also access the dedicated administrative console.*
+
+## Evaluator Testing Instructions
+1. Open the live frontend: [https://pos-ecommerce-systems-zb3q.vercel.app](https://pos-ecommerce-systems-zb3q.vercel.app)
+2. Sign in using the demo admin credentials (`admin@techloom.com` / `AdminSecurePass!2026`).
+3. Browse products on the storefront catalog.
+4. Select a product and add it to your shopping cart.
+5. Proceed to checkout and submit shipping details to create a 5-minute stock reservation.
+6. Proceed to payment. Notice the realistic credit/debit card form with dynamic total amount (`Pay $XX.XX`).
+7. Complete the payment flow to view the order confirmation.
+8. Navigate to "My Orders" to inspect order history and status.
+9. Open the Admin Console from the user navigation menu.
+10. Review the operational dashboard KPIs, user directory, product inventory, customer orders, and forensic audit logs.
+
+## Payment Processing
+- **Secure Card Payment:** Enter card details and click Pay; the payment gateway processes the payment and transitions the order to `PAID`.
+- **Duplicate Payment Protection:** Submissions use automatic idempotency keys; duplicate submissions return cached results without re-charging or modifying stock.
+- **Customer Cancellation:** Customers can cancel `RESERVED` orders directly from the order details page, releasing stock immediately.
+- **Admin Refund Workflow:** For `PAID` orders, customer direct refund is prevented. Administrators inspect paid orders in the Admin Console and execute refunds with reason tracking and forensic audit logging.
+- **Reservation Expiry:** A background sweeper daemon releases reservations after 5 minutes (`RESERVATION_TTL_SECONDS=300`) if unpaid, restoring product inventory.
+
+---
+
 ## Architecture at a Glance
 
 ```
@@ -28,10 +61,10 @@ task-02/
         │   ├── account/    Profile (avatar upload), Security (change password)
         │   └── admin/      Dashboard, Users, Products, Orders, AuditLogs
         └── components/
-            ├── layout/    Navbar, Footer, AdminLayout (sidebar + RBAC guard)
+            ├── layout/    Navbar, Footer, AdminLayout (sidebar + RBAC guard), CheckoutLayout
             ├── common/    Avatar, CountdownTimer (5-min reservation bar)
             ├── storefront/ ProductCard, ProductFilters
-            └── checkout/  MockPaymentSelector (SUCCESS / FAILURE / TIMEOUT toggle)
+            └── checkout/  CheckoutProgress (Cart → Delivery → Payment)
 ```
 
 ---

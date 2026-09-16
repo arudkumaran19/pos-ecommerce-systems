@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { Key, Mail, CheckCircle2, AlertCircle } from 'lucide-react';
 import { apiRequest } from '../../lib/api-client';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
 
 export const SecurityPage: React.FC = () => {
-  const { user, refreshProfile } = useAuth();
+  const { refreshProfile } = useAuth();
   const toast = useToast();
 
   // Password change state
@@ -24,8 +25,9 @@ export const SecurityPage: React.FC = () => {
   const handlePasswordSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (newPassword !== confirmPassword) {
-      setPwdFeedback({ type: 'error', text: 'New passwords do not match.' });
-      toast.error('New passwords do not match.');
+      const msg = 'New passwords do not match.';
+      setPwdFeedback({ type: 'error', text: msg });
+      toast.error(msg);
       return;
     }
 
@@ -40,7 +42,7 @@ export const SecurityPage: React.FC = () => {
           confirm_new_password: confirmPassword,
         },
       });
-      const msg = 'Password updated. Other active sessions revoked.';
+      const msg = 'Password updated successfully.';
       setPwdFeedback({ type: 'success', text: msg });
       toast.success(msg);
       setCurrentPassword('');
@@ -83,29 +85,42 @@ export const SecurityPage: React.FC = () => {
   };
 
   return (
-    <div className="max-w-2xl mx-auto px-4 sm:px-6 py-8">
+    <div className="max-w-3xl mx-auto px-4 sm:px-6 py-10">
       <div className="mb-8">
-        <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
-          Security & Credentials
+        <h1 className="text-2xl sm:text-3xl font-bold text-[#F5F3EE] tracking-tight">
+          Security
         </h1>
-        <p className="text-xs text-slate-400 mt-1">
-          Manage password authentication and email credentials.
+        <p className="text-xs text-[#A5ABB5] mt-1">
+          Manage your password and sign-in email.
         </p>
+
+        {/* Account Nav Tabs */}
+        <div className="flex items-center gap-4 mt-6 border-b border-[#242A35] pb-3 text-xs font-medium">
+          <Link to="/profile" className="text-[#A5ABB5] hover:text-[#F5F3EE] transition-colors">
+            Personal details
+          </Link>
+          <Link to="/orders" className="text-[#A5ABB5] hover:text-[#F5F3EE] transition-colors">
+            Orders
+          </Link>
+          <Link to="/security" className="text-[#4FB7A5] border-b-2 border-[#4FB7A5] pb-3 -mb-3 font-semibold">
+            Security
+          </Link>
+        </div>
       </div>
 
-      <div className="space-y-8">
+      <div className="space-y-6">
         {/* Password Form */}
-        <form onSubmit={handlePasswordSubmit} className="glass-panel p-6 rounded-2xl border border-slate-800 space-y-4">
-          <h2 className="text-base font-bold text-white flex items-center gap-2">
-            <Key className="w-4 h-4 text-emerald-400" />
-            Change Password
+        <form onSubmit={handlePasswordSubmit} className="bg-[#10131A] p-6 rounded-xl border border-[#242A35] space-y-4">
+          <h2 className="text-sm font-semibold text-[#F5F3EE] flex items-center gap-2">
+            <Key className="w-4 h-4 text-[#4FB7A5]" />
+            Change password
           </h2>
 
           {pwdFeedback && (
             <div
-              className={`p-3.5 rounded-xl text-xs flex items-center gap-2 ${
+              className={`p-3 rounded-lg text-xs flex items-center gap-2.5 ${
                 pwdFeedback.type === 'success'
-                  ? 'bg-emerald-500/10 border border-emerald-500/30 text-emerald-300'
+                  ? 'bg-[#151922] border border-[#4FB7A5]/30 text-[#4FB7A5]'
                   : 'bg-rose-500/10 border border-rose-500/30 text-rose-300'
               }`}
             >
@@ -119,59 +134,59 @@ export const SecurityPage: React.FC = () => {
           )}
 
           <div>
-            <label className="text-xs font-semibold text-slate-300 block mb-1">Current Password</label>
+            <label className="text-xs font-medium text-[#A5ABB5] block mb-1.5">Current password</label>
             <input
               type="password"
               required
               value={currentPassword}
               onChange={(e) => setCurrentPassword(e.target.value)}
-              className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-sm text-white focus:outline-none focus:border-emerald-500"
+              className="w-full max-w-md px-3.5 py-2.5 rounded-lg bg-[#080A0F] border border-[#242A35] text-xs text-[#F5F3EE] focus:outline-none focus:border-[#4FB7A5] transition-colors"
             />
           </div>
 
           <div>
-            <label className="text-xs font-semibold text-slate-300 block mb-1">New Password (min 8 chars)</label>
+            <label className="text-xs font-medium text-[#A5ABB5] block mb-1.5">New password</label>
             <input
               type="password"
               required
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
-              className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-sm text-white focus:outline-none focus:border-emerald-500"
+              className="w-full max-w-md px-3.5 py-2.5 rounded-lg bg-[#080A0F] border border-[#242A35] text-xs text-[#F5F3EE] focus:outline-none focus:border-[#4FB7A5] transition-colors"
             />
           </div>
 
           <div>
-            <label className="text-xs font-semibold text-slate-300 block mb-1">Confirm New Password</label>
+            <label className="text-xs font-medium text-[#A5ABB5] block mb-1.5">Confirm new password</label>
             <input
               type="password"
               required
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
-              className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-sm text-white focus:outline-none focus:border-emerald-500"
+              className="w-full max-w-md px-3.5 py-2.5 rounded-lg bg-[#080A0F] border border-[#242A35] text-xs text-[#F5F3EE] focus:outline-none focus:border-[#4FB7A5] transition-colors"
             />
           </div>
 
           <button
             type="submit"
             disabled={changingPassword}
-            className="py-2.5 px-5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-bold shadow-md cursor-pointer disabled:opacity-60"
+            className="px-4 py-2 rounded-lg bg-[#4FB7A5] hover:bg-[#43A090] text-[#080A0F] text-xs font-semibold cursor-pointer disabled:opacity-50 transition-colors"
           >
-            {changingPassword ? 'Updating...' : 'Update Password'}
+            {changingPassword ? 'Updating…' : 'Update password'}
           </button>
         </form>
 
         {/* Change Email Form */}
-        <form onSubmit={handleEmailSubmit} className="glass-panel p-6 rounded-2xl border border-slate-800 space-y-4">
-          <h2 className="text-base font-bold text-white flex items-center gap-2">
-            <Mail className="w-4 h-4 text-emerald-400" />
-            Change Email Address
+        <form onSubmit={handleEmailSubmit} className="bg-[#10131A] p-6 rounded-xl border border-[#242A35] space-y-4">
+          <h2 className="text-sm font-semibold text-[#F5F3EE] flex items-center gap-2">
+            <Mail className="w-4 h-4 text-[#4FB7A5]" />
+            Change email address
           </h2>
 
           {emailFeedback && (
             <div
-              className={`p-3.5 rounded-xl text-xs flex items-center gap-2 ${
+              className={`p-3 rounded-lg text-xs flex items-center gap-2.5 ${
                 emailFeedback.type === 'success'
-                  ? 'bg-emerald-500/10 border border-emerald-500/30 text-emerald-300'
+                  ? 'bg-[#151922] border border-[#4FB7A5]/30 text-[#4FB7A5]'
                   : 'bg-rose-500/10 border border-rose-500/30 text-rose-300'
               }`}
             >
@@ -185,34 +200,34 @@ export const SecurityPage: React.FC = () => {
           )}
 
           <div>
-            <label className="text-xs font-semibold text-slate-300 block mb-1">New Email Address</label>
+            <label className="text-xs font-medium text-[#A5ABB5] block mb-1.5">New email address</label>
             <input
               type="email"
               required
               value={newEmail}
               onChange={(e) => setNewEmail(e.target.value)}
-              placeholder="new.email@example.com"
-              className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-sm text-white focus:outline-none focus:border-emerald-500"
+              placeholder="name@example.com"
+              className="w-full max-w-md px-3.5 py-2.5 rounded-lg bg-[#080A0F] border border-[#242A35] text-xs text-[#F5F3EE] focus:outline-none focus:border-[#4FB7A5] transition-colors"
             />
           </div>
 
           <div>
-            <label className="text-xs font-semibold text-slate-300 block mb-1">Confirm with Current Password</label>
+            <label className="text-xs font-medium text-[#A5ABB5] block mb-1.5">Current password</label>
             <input
               type="password"
               required
               value={emailPassword}
               onChange={(e) => setEmailPassword(e.target.value)}
-              className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-sm text-white focus:outline-none focus:border-emerald-500"
+              className="w-full max-w-md px-3.5 py-2.5 rounded-lg bg-[#080A0F] border border-[#242A35] text-xs text-[#F5F3EE] focus:outline-none focus:border-[#4FB7A5] transition-colors"
             />
           </div>
 
           <button
             type="submit"
             disabled={changingEmail}
-            className="py-2.5 px-5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-bold shadow-md cursor-pointer disabled:opacity-60"
+            className="px-4 py-2 rounded-lg bg-[#4FB7A5] hover:bg-[#43A090] text-[#080A0F] text-xs font-semibold cursor-pointer disabled:opacity-50 transition-colors"
           >
-            {changingEmail ? 'Updating Email...' : 'Update Email Address'}
+            {changingEmail ? 'Updating…' : 'Update email'}
           </button>
         </form>
       </div>

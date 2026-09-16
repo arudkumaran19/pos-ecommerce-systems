@@ -12,6 +12,7 @@ from app.core.exceptions import (
 )
 from app.services.session_service import SessionService
 from app.services.audit_service import AuditService
+from app.services.email_service import EmailService
 
 class AuthService:
     def __init__(self, db: Session):
@@ -20,6 +21,7 @@ class AuthService:
         self.session_repo = SessionRepository(db)
         self.session_service = SessionService(db)
         self.audit_service = AuditService(db)
+        self.email_service = EmailService()
 
     def register(
         self,
@@ -136,6 +138,13 @@ class AuthService:
                 actor_user_id=user.id,
                 target_user_id=user.id,
                 ip_address=ip_address
+            )
+            
+            # Send branded transactional email through Resend
+            self.email_service.send_password_reset_email(
+                recipient_email=user.email,
+                raw_token=raw_token,
+                recipient_name=user.full_name
             )
             token_for_dev = raw_token
             

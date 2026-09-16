@@ -9,6 +9,7 @@ import { LoadingScreen } from './components/common/LoadingScreen';
 import { Navbar } from './components/layout/Navbar';
 import { Footer } from './components/layout/Footer';
 import { AdminLayout } from './components/layout/AdminLayout';
+import { CheckoutLayout } from './components/layout/CheckoutLayout';
 
 // Storefront Pages
 import { StorePage } from './pages/storefront/StorePage';
@@ -40,7 +41,7 @@ import { AdminAuditLogsPage } from './pages/admin/AdminAuditLogsPage';
 // Storefront Shell with sticky Navbar & Footer
 const StorefrontLayout: React.FC = () => {
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col justify-between selection:bg-emerald-500/30 selection:text-emerald-200">
+    <div className="min-h-screen bg-[#080A0F] text-[#F5F3EE] flex flex-col selection:bg-[#4FB7A5]/20 selection:text-[#F5F3EE]">
       <Navbar />
       <main className="flex-1">
         <Outlet />
@@ -56,7 +57,7 @@ const ProtectedRoute: React.FC = () => {
   const location = useLocation();
 
   if (loading) {
-    return <LoadingScreen message="Verifying session..." submessage="Checking secure authentication credentials" />;
+    return <LoadingScreen message="Loading…" submessage="Please wait a moment" />;
   }
 
   if (!user) {
@@ -71,7 +72,7 @@ const GuestRoute: React.FC = () => {
   const { user, loading } = useAuth();
 
   if (loading) {
-    return <LoadingScreen message="Verifying session..." submessage="Preparing your secure guest access" />;
+    return <LoadingScreen message="Loading…" submessage="Please wait a moment" />;
   }
 
   if (user) {
@@ -88,47 +89,53 @@ function App() {
         <AuthProvider>
           <CartProvider>
             <Routes>
-            {/* Storefront Layout Routes */}
-            <Route element={<StorefrontLayout />}>
-              {/* Public Storefront */}
-              <Route path="/" element={<StorePage />} />
-              <Route path="/products/:slug" element={<ProductDetailPage />} />
-              <Route path="/cart" element={<CartPage />} />
+              {/* Storefront Layout Routes (with Global Navbar + Footer) */}
+              <Route element={<StorefrontLayout />}>
+                {/* Public Storefront */}
+                <Route path="/" element={<StorePage />} />
+                <Route path="/products/:slug" element={<ProductDetailPage />} />
 
-              {/* Guest Auth Pages */}
-              <Route element={<GuestRoute />}>
-                <Route path="/login" element={<LoginPage />} />
-                <Route path="/register" element={<RegisterPage />} />
-                <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-                <Route path="/reset-password" element={<ResetPasswordPage />} />
+                {/* Guest Auth Pages */}
+                <Route element={<GuestRoute />}>
+                  <Route path="/login" element={<LoginPage />} />
+                  <Route path="/register" element={<RegisterPage />} />
+                  <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+                  <Route path="/reset-password" element={<ResetPasswordPage />} />
+                </Route>
+
+                {/* Customer Account & Order Routes */}
+                <Route element={<ProtectedRoute />}>
+                  <Route path="/orders/confirmation/:id" element={<OrderConfirmationPage />} />
+                  <Route path="/orders" element={<MyOrdersPage />} />
+                  <Route path="/orders/:id" element={<OrderDetailPage />} />
+                  <Route path="/profile" element={<ProfilePage />} />
+                  <Route path="/security" element={<SecurityPage />} />
+                </Route>
               </Route>
 
-              {/* Protected Customer Routes */}
-              <Route element={<ProtectedRoute />}>
-                <Route path="/checkout" element={<CheckoutPage />} />
-                <Route path="/payment/:orderId" element={<PaymentPage />} />
-                <Route path="/orders/confirmation/:id" element={<OrderConfirmationPage />} />
-                <Route path="/orders" element={<MyOrdersPage />} />
-                <Route path="/orders/:id" element={<OrderDetailPage />} />
-                <Route path="/profile" element={<ProfilePage />} />
-                <Route path="/security" element={<SecurityPage />} />
+              {/* Dedicated Checkout Flow (Cart ── Delivery ── Payment) with Unified Minimal Shell */}
+              <Route element={<CheckoutLayout />}>
+                <Route path="/cart" element={<CartPage />} />
+                <Route element={<ProtectedRoute />}>
+                  <Route path="/checkout" element={<CheckoutPage />} />
+                  <Route path="/payment/:orderId" element={<PaymentPage />} />
+                </Route>
               </Route>
-            </Route>
 
-            {/* Protected Admin Routes (Rendered inside AdminLayout) */}
-            <Route path="/admin" element={<AdminLayout />}>
-              <Route index element={<AdminDashboardPage />} />
-              <Route path="users" element={<AdminUsersPage />} />
-              <Route path="products" element={<AdminProductsPage />} />
-              <Route path="orders" element={<AdminOrdersPage />} />
-              <Route path="audit-logs" element={<AdminAuditLogsPage />} />
-            </Route>
+              {/* Protected Admin Routes (Rendered inside AdminLayout fixed shell) */}
+              <Route path="/admin" element={<AdminLayout />}>
+                <Route index element={<AdminDashboardPage />} />
+                <Route path="users" element={<AdminUsersPage />} />
+                <Route path="products" element={<AdminProductsPage />} />
+                <Route path="orders" element={<AdminOrdersPage />} />
+                <Route path="audit-logs" element={<AdminAuditLogsPage />} />
+              </Route>
 
-            {/* Fallback */}
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-        </CartProvider>
-      </AuthProvider>
+              {/* Fallback */}
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </CartProvider>
+        </AuthProvider>
       </ToastProvider>
     </BrowserRouter>
   );

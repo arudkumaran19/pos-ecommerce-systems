@@ -1,19 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import { 
-  ShoppingCart, 
   RotateCcw, 
   Eye, 
   AlertCircle, 
   CheckCircle2, 
   X,
-  ChevronLeft,
+  ChevronLeft, 
   ChevronRight,
-  Clock,
-  CreditCard
+  Clock
 } from 'lucide-react';
 import { apiClient } from '../../lib/api-client';
-import { Order, OrderStatus, PaginatedResponse } from '../../types';
-import { formatCurrency, formatDate } from '../../lib/formatters';
+import { Order, PaginatedResponse } from '../../types';
+import { formatCurrency, formatDate, formatOrderStatus, formatProductName, getOrderStatusColor } from '../../lib/formatters';
 import { useToast } from '../../context/ToastContext';
 
 export const AdminOrdersPage: React.FC = () => {
@@ -80,55 +78,37 @@ export const AdminOrdersPage: React.FC = () => {
     }
   };
 
-  const getStatusBadge = (status: OrderStatus) => {
-    switch (status) {
-      case 'PAID':
-        return 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20';
-      case 'RESERVED':
-        return 'bg-amber-500/10 text-amber-400 border-amber-500/20';
-      case 'PENDING':
-        return 'bg-blue-500/10 text-blue-400 border-blue-500/20';
-      case 'CANCELLED':
-        return 'bg-purple-500/10 text-purple-400 border-purple-500/20';
-      case 'EXPIRED':
-        return 'bg-slate-800 text-slate-400 border-slate-700';
-      case 'FAILED':
-      default:
-        return 'bg-rose-500/10 text-rose-400 border-rose-500/20';
-    }
-  };
-
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-black text-white tracking-tight">Orders & Fulfillment</h1>
-          <p className="text-slate-400 text-sm mt-1">
-            Track customer orders, monitor status, and issue refunds
+          <h1 className="text-xl sm:text-2xl font-bold text-[#F5F3EE] tracking-tight">Orders</h1>
+          <p className="text-[#A5ABB5] text-xs mt-0.5">
+            Manage customer purchases, view order details, and issue refunds.
           </p>
         </div>
-        <div className="text-xs text-slate-400 bg-slate-900 px-3 py-1.5 rounded-xl border border-slate-800">
-          Total Orders: <span className="font-bold text-white">{total}</span>
+        <div className="text-xs text-[#A5ABB5] bg-[#10131A] px-3 py-1.5 rounded-lg border border-[#242A35]">
+          Total orders: <span className="font-semibold text-[#F5F3EE]">{total}</span>
         </div>
       </div>
 
       {successMsg && (
-        <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-sm flex items-center justify-between">
+        <div className="p-3.5 rounded-lg bg-[#151922] border border-[#4FB7A5]/30 text-[#4FB7A5] text-xs flex items-center justify-between">
           <div className="flex items-center gap-2">
             <CheckCircle2 className="w-4 h-4 shrink-0" />
             <span>{successMsg}</span>
           </div>
-          <button onClick={() => setSuccessMsg(null)} className="text-emerald-400 hover:text-white">
+          <button onClick={() => setSuccessMsg(null)} className="text-[#A5ABB5] hover:text-[#F5F3EE]">
             <X className="w-4 h-4" />
           </button>
         </div>
       )}
 
       {/* Filter Bar */}
-      <div className="glass-card p-4 flex flex-wrap gap-2.5 items-center justify-between">
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="text-xs font-semibold text-slate-400 mr-1">Filter by Status:</span>
+      <div className="bg-[#10131A] p-3.5 rounded-xl border border-[#242A35] flex flex-wrap gap-2 items-center justify-between">
+        <div className="flex flex-wrap items-center gap-1.5">
+          <span className="text-xs font-medium text-[#A5ABB5] mr-1.5">Filter status:</span>
           {['', 'PAID', 'RESERVED', 'PENDING', 'CANCELLED', 'EXPIRED', 'FAILED'].map((st) => (
             <button
               key={st}
@@ -136,82 +116,82 @@ export const AdminOrdersPage: React.FC = () => {
                 setStatusFilter(st);
                 setPage(1);
               }}
-              className={`px-3 py-1 rounded-xl text-xs font-semibold transition-all ${
+              className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-colors ${
                 statusFilter === st
-                  ? 'bg-indigo-600 text-white shadow-sm shadow-indigo-600/20'
-                  : 'bg-slate-900 border border-slate-800 text-slate-400 hover:text-white hover:bg-slate-800'
+                  ? 'bg-[#4FB7A5] text-[#080A0F] font-semibold'
+                  : 'bg-[#151922] border border-[#242A35] text-[#A5ABB5] hover:text-[#F5F3EE] hover:bg-[#1C222C]'
               }`}
             >
-              {st || 'All'}
+              {st ? formatOrderStatus(st) : 'All'}
             </button>
           ))}
         </div>
       </div>
 
       {/* Orders Table */}
-      <div className="glass-card overflow-hidden">
+      <div className="bg-[#10131A] rounded-xl border border-[#242A35] overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="border-b border-slate-800 text-[11px] font-bold text-slate-400 uppercase tracking-wider bg-slate-900/40">
-                <th className="py-3.5 px-4">Order ID</th>
-                <th className="py-3.5 px-4">Customer</th>
-                <th className="py-3.5 px-4">Items</th>
-                <th className="py-3.5 px-4">Total</th>
-                <th className="py-3.5 px-4">Status</th>
-                <th className="py-3.5 px-4">Date</th>
-                <th className="py-3.5 px-4 text-right">Actions</th>
+              <tr className="border-b border-[#242A35] text-[11px] font-semibold text-[#A5ABB5] uppercase tracking-wider bg-[#151922]/50">
+                <th className="py-3 px-4">Order</th>
+                <th className="py-3 px-4">Customer</th>
+                <th className="py-3 px-4">Items</th>
+                <th className="py-3 px-4">Total</th>
+                <th className="py-3 px-4">Status</th>
+                <th className="py-3 px-4">Date</th>
+                <th className="py-3 px-4 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800/60 text-xs">
+            <tbody className="divide-y divide-[#242A35] text-xs">
               {loading ? (
                 <tr>
-                  <td colSpan={7} className="py-12 text-center text-slate-400">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-500 mx-auto" />
+                  <td colSpan={7} className="py-12 text-center text-[#A5ABB5]">
+                    <div className="animate-spin rounded-full h-6 w-6 border-2 border-[#4FB7A5] border-t-transparent mx-auto" />
                   </td>
                 </tr>
               ) : orders.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="py-12 text-center text-slate-400">
+                  <td colSpan={7} className="py-12 text-center text-[#A5ABB5]">
                     No orders found matching criteria.
                   </td>
                 </tr>
               ) : (
                 orders.map((o) => (
-                  <tr key={o.id} className="hover:bg-slate-900/30 transition-colors">
-                    <td className="py-3.5 px-4 font-mono font-bold text-white">
+                  <tr key={o.id} className="hover:bg-[#151922]/40 transition-colors">
+                    <td className="py-3 px-4 font-semibold text-[#F5F3EE]">
                       #{o.id.slice(0, 8)}
                     </td>
-                    <td className="py-3.5 px-4">
+                    <td className="py-3 px-4">
                       {o.customer ? (
                         <div>
-                          <div className="font-semibold text-slate-200 text-xs">{o.customer.full_name}</div>
-                          <div className="font-mono text-[11px] text-slate-500">{o.customer.email}</div>
+                          <div className="font-medium text-[#F5F3EE] text-xs">{o.customer.full_name}</div>
+                          <div className="text-[11px] text-[#A5ABB5]">{o.customer.email}</div>
                         </div>
                       ) : (
-                        <span className="font-mono text-[11px] text-slate-400">{o.user_id.slice(0, 8)}...</span>
+                        <span className="text-[11px] text-[#A5ABB5]">Customer #{o.user_id.slice(0, 8)}</span>
                       )}
                     </td>
-                    <td className="py-3.5 px-4 text-slate-300">
-                      {o.items?.length || 0} items
+                    <td className="py-3 px-4 text-[#A5ABB5]">
+                      {o.items?.length || 0} {o.items?.length === 1 ? 'item' : 'items'}
                     </td>
-                    <td className="py-3.5 px-4 font-bold text-white">
+                    <td className="py-3 px-4 font-semibold text-[#F5F3EE] tabular-nums">
                       {formatCurrency(o.total)}
                     </td>
-                    <td className="py-3.5 px-4">
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border ${getStatusBadge(o.status)}`}>
-                        {o.status}
+                    <td className="py-3 px-4">
+                      <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-medium border ${getOrderStatusColor(o.status)}`}>
+                        {formatOrderStatus(o.status)}
                       </span>
                     </td>
-                    <td className="py-3.5 px-4 text-slate-400">
+                    <td className="py-3 px-4 text-[#A5ABB5]">
                       {formatDate(o.created_at)}
                     </td>
-                    <td className="py-3.5 px-4 text-right">
+                    <td className="py-3 px-4 text-right">
                       <div className="flex items-center justify-end gap-1.5">
                         <button
                           onClick={() => setSelectedOrder(o)}
-                          className="p-1.5 rounded-lg border border-indigo-500/20 text-indigo-400 hover:bg-indigo-500/10 transition-colors"
-                          title="Inspect Order"
+                          className="p-1.5 rounded-lg border border-[#242A35] text-[#A5ABB5] hover:text-[#F5F3EE] hover:bg-[#151922] transition-colors"
+                          title="View order details"
                         >
                           <Eye className="w-3.5 h-3.5" />
                         </button>
@@ -223,8 +203,8 @@ export const AdminOrdersPage: React.FC = () => {
                               setActionError(null);
                               setRefundModalOpen(true);
                             }}
-                            className="p-1.5 rounded-lg border border-purple-500/20 text-purple-400 hover:bg-purple-500/10 transition-colors"
-                            title="Administrative Refund"
+                            className="p-1.5 rounded-lg border border-amber-500/20 text-amber-400 hover:bg-amber-500/10 transition-colors"
+                            title="Issue refund"
                           >
                             <RotateCcw className="w-3.5 h-3.5" />
                           </button>
@@ -240,20 +220,20 @@ export const AdminOrdersPage: React.FC = () => {
 
         {/* Pagination */}
         {totalPages > 1 && (
-          <div className="p-4 border-t border-slate-800/80 flex items-center justify-between text-xs text-slate-400">
+          <div className="p-3.5 border-t border-[#242A35] flex items-center justify-between text-xs text-[#A5ABB5]">
             <span>Page {page} of {totalPages}</span>
             <div className="flex items-center gap-2">
               <button
                 disabled={page <= 1}
                 onClick={() => setPage(p => p - 1)}
-                className="p-1.5 rounded-lg bg-slate-900 border border-slate-800 text-slate-300 disabled:opacity-40 hover:bg-slate-800"
+                className="p-1 rounded-lg bg-[#151922] border border-[#242A35] text-[#F5F3EE] disabled:opacity-40 hover:bg-[#1C222C]"
               >
                 <ChevronLeft className="w-4 h-4" />
               </button>
               <button
                 disabled={page >= totalPages}
                 onClick={() => setPage(p => p + 1)}
-                className="p-1.5 rounded-lg bg-slate-900 border border-slate-800 text-slate-300 disabled:opacity-40 hover:bg-slate-800"
+                className="p-1 rounded-lg bg-[#151922] border border-[#242A35] text-[#F5F3EE] disabled:opacity-40 hover:bg-[#1C222C]"
               >
                 <ChevronRight className="w-4 h-4" />
               </button>
@@ -264,80 +244,76 @@ export const AdminOrdersPage: React.FC = () => {
 
       {/* Order Inspection Modal */}
       {selectedOrder && !refundModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="glass-card max-w-2xl w-full p-6 border-slate-700 space-y-4 max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+        <div className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center p-4">
+          <div className="bg-[#10131A] border border-[#242A35] max-w-2xl w-full p-6 rounded-xl space-y-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between border-b border-[#242A35] pb-3">
               <div>
-                <h3 className="font-bold text-white text-base">
-                  Order Details #{selectedOrder.id}
+                <h3 className="font-bold text-[#F5F3EE] text-base">
+                  Order #{selectedOrder.id.slice(0, 8)}
                 </h3>
-                <span className="text-[11px] text-slate-400">
+                <span className="text-xs text-[#A5ABB5]">
                   Placed {formatDate(selectedOrder.created_at)}
                 </span>
               </div>
-              <button onClick={() => setSelectedOrder(null)} className="text-slate-400 hover:text-white">
-                <X className="w-5 h-5" />
+              <button onClick={() => setSelectedOrder(null)} className="text-[#A5ABB5] hover:text-[#F5F3EE]">
+                <X className="w-4 h-4" />
               </button>
             </div>
 
             {/* Overview Grid */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              <div className="p-3 rounded-xl bg-slate-900/60 border border-slate-800">
-                <span className="text-[10px] text-slate-500 uppercase tracking-wider block">Status</span>
-                <span className={`inline-flex items-center px-2 py-0.5 mt-1 rounded-full text-[10px] font-bold border ${getStatusBadge(selectedOrder.status)}`}>
-                  {selectedOrder.status}
+              <div className="p-3 rounded-lg bg-[#151922] border border-[#242A35]">
+                <span className="text-[10px] text-[#A5ABB5] uppercase tracking-wider block">Status</span>
+                <span className={`inline-flex items-center px-2 py-0.5 mt-1 rounded-md text-[10px] font-medium border ${getOrderStatusColor(selectedOrder.status)}`}>
+                  {formatOrderStatus(selectedOrder.status)}
                 </span>
               </div>
-              <div className="p-3 rounded-xl bg-slate-900/60 border border-slate-800">
-                <span className="text-[10px] text-slate-500 uppercase tracking-wider block">Subtotal</span>
-                <span className="text-xs font-bold text-white mt-1 block">{formatCurrency(selectedOrder.subtotal)}</span>
+              <div className="p-3 rounded-lg bg-[#151922] border border-[#242A35]">
+                <span className="text-[10px] text-[#A5ABB5] uppercase tracking-wider block">Subtotal</span>
+                <span className="text-xs font-semibold text-[#F5F3EE] mt-1 block tabular-nums">{formatCurrency(selectedOrder.subtotal)}</span>
               </div>
-              <div className="p-3 rounded-xl bg-slate-900/60 border border-slate-800">
-                <span className="text-[10px] text-slate-500 uppercase tracking-wider block">Shipping</span>
-                <span className="text-xs font-bold text-white mt-1 block">{formatCurrency(selectedOrder.shipping_fee)}</span>
+              <div className="p-3 rounded-lg bg-[#151922] border border-[#242A35]">
+                <span className="text-[10px] text-[#A5ABB5] uppercase tracking-wider block">Delivery</span>
+                <span className="text-xs font-semibold text-[#F5F3EE] mt-1 block">{selectedOrder.shipping_fee === '0' ? 'Free' : formatCurrency(selectedOrder.shipping_fee)}</span>
               </div>
-              <div className="p-3 rounded-xl bg-slate-900/60 border border-slate-800">
-                <span className="text-[10px] text-slate-500 uppercase tracking-wider block">Total</span>
-                <span className="text-xs font-bold text-emerald-400 mt-1 block">{formatCurrency(selectedOrder.total)}</span>
+              <div className="p-3 rounded-lg bg-[#151922] border border-[#242A35]">
+                <span className="text-[10px] text-[#A5ABB5] uppercase tracking-wider block">Total</span>
+                <span className="text-xs font-bold text-[#4FB7A5] mt-1 block tabular-nums">{formatCurrency(selectedOrder.total)}</span>
               </div>
             </div>
 
             {/* Line Items */}
             <div>
-              <h4 className="text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">Purchased Items</h4>
-              <div className="divide-y divide-slate-800 border border-slate-800 rounded-xl overflow-hidden bg-slate-900/40">
+              <h4 className="text-xs font-semibold text-[#A5ABB5] uppercase tracking-wider mb-2">Purchased Items</h4>
+              <div className="divide-y divide-[#242A35] border border-[#242A35] rounded-lg overflow-hidden bg-[#080A0F]">
                 {selectedOrder.items?.map((item) => (
                   <div key={item.id} className="p-3 flex items-center justify-between text-xs">
                     <div>
-                      <span className="font-bold text-white block">{item.product_name}</span>
-                      <span className="text-[11px] text-slate-400">Qty: {item.quantity} × {formatCurrency(item.unit_price)}</span>
+                      <span className="font-medium text-[#F5F3EE] block">{formatProductName(item.product_name)}</span>
+                      <span className="text-[11px] text-[#A5ABB5]">Qty: {item.quantity} × {formatCurrency(item.unit_price)}</span>
                     </div>
-                    <span className="font-bold text-white">{formatCurrency(item.subtotal)}</span>
+                    <span className="font-semibold text-[#F5F3EE] tabular-nums">{formatCurrency(item.subtotal)}</span>
                   </div>
                 ))}
               </div>
             </div>
 
-            {/* Stock Reservations */}
+            {/* Stock Holds */}
             {selectedOrder.reservations && selectedOrder.reservations.length > 0 && (
               <div>
-                <h4 className="text-xs font-bold text-slate-300 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                <h4 className="text-xs font-semibold text-[#A5ABB5] uppercase tracking-wider mb-2 flex items-center gap-1.5">
                   <Clock className="w-3.5 h-3.5 text-amber-400" />
-                  Inventory Reservations
+                  Held items
                 </h4>
                 <div className="space-y-1.5">
                   {selectedOrder.reservations.map((res) => (
-                    <div key={res.id} className="p-2.5 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-between text-xs">
+                    <div key={res.id} className="p-2.5 rounded-lg bg-[#151922] border border-[#242A35] flex items-center justify-between text-xs">
                       <div>
-                        <span className="text-slate-300">Product: {res.product_id.slice(0, 8)}...</span>
-                        <span className="text-[11px] text-slate-500 ml-2">Qty: {res.quantity}</span>
+                        <span className="text-[#A5ABB5]">Qty: {res.quantity}</span>
                       </div>
                       <div className="flex items-center gap-3">
-                        <span className="text-[10px] text-slate-400">Expires: {formatDate(res.expires_at)}</span>
-                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                          res.status === 'ACTIVE' ? 'bg-amber-500/10 text-amber-400' :
-                          res.status === 'CONSUMED' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-slate-800 text-slate-400'
-                        }`}>
+                        <span className="text-[11px] text-[#A5ABB5]">Expires: {formatDate(res.expires_at)}</span>
+                        <span className="text-[11px] font-medium text-[#F5F3EE]">
                           {res.status}
                         </span>
                       </div>
@@ -349,24 +325,22 @@ export const AdminOrdersPage: React.FC = () => {
 
             {/* Shipping Address */}
             {selectedOrder.shipping_address && (
-              <div className="p-3 rounded-xl bg-slate-900/60 border border-slate-800 text-xs">
-                <span className="text-[10px] text-slate-500 uppercase tracking-wider block mb-1">Shipping Destination</span>
-                <p className="text-slate-300">
+              <div className="p-3 rounded-lg bg-[#151922] border border-[#242A35] text-xs">
+                <span className="text-[10px] text-[#A5ABB5] uppercase tracking-wider block mb-1">Delivery address</span>
+                <p className="text-[#F5F3EE]">
                   {[
                     selectedOrder.shipping_address.full_name,
                     selectedOrder.shipping_address.address_line1,
-                    selectedOrder.shipping_address.address_line2,
                     selectedOrder.shipping_address.city,
                     selectedOrder.shipping_address.postal_code,
                     selectedOrder.shipping_address.country,
-                    selectedOrder.shipping_address.street,
                   ].filter(Boolean).join(', ')}
                 </p>
               </div>
             )}
 
             {/* Action Buttons */}
-            <div className="flex justify-end gap-2 pt-3 border-t border-slate-800">
+            <div className="flex justify-end gap-2 pt-2 border-t border-[#242A35]">
               {selectedOrder.status === 'PAID' && (
                 <button
                   onClick={() => {
@@ -374,14 +348,14 @@ export const AdminOrdersPage: React.FC = () => {
                     setActionError(null);
                     setRefundModalOpen(true);
                   }}
-                  className="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-semibold"
+                  className="px-3.5 py-1.5 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/20 text-xs font-medium"
                 >
-                  Issue Refund
+                  Issue refund
                 </button>
               )}
               <button
                 onClick={() => setSelectedOrder(null)}
-                className="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 text-xs font-semibold hover:bg-slate-700"
+                className="px-3.5 py-1.5 rounded-lg bg-[#151922] text-[#A5ABB5] text-xs font-medium hover:text-[#F5F3EE] hover:bg-[#1C222C]"
               >
                 Close
               </button>
@@ -392,53 +366,53 @@ export const AdminOrdersPage: React.FC = () => {
 
       {/* Refund Modal */}
       {refundModalOpen && selectedOrder && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="glass-card max-w-md w-full p-6 border-slate-700 space-y-4">
-            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-              <h3 className="font-bold text-white text-base">
-                Confirm Administrative Refund
+        <div className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center p-4">
+          <div className="bg-[#10131A] border border-[#242A35] max-w-md w-full p-6 rounded-xl space-y-4">
+            <div className="flex items-center justify-between border-b border-[#242A35] pb-3">
+              <h3 className="font-bold text-[#F5F3EE] text-base">
+                Confirm refund
               </h3>
-              <button onClick={() => setRefundModalOpen(false)} className="text-slate-400 hover:text-white">
-                <X className="w-5 h-5" />
+              <button onClick={() => setRefundModalOpen(false)} className="text-[#A5ABB5] hover:text-[#F5F3EE]">
+                <X className="w-4 h-4" />
               </button>
             </div>
 
             {actionError && (
-              <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs flex items-center gap-2">
+              <div className="p-3 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs flex items-center gap-2">
                 <AlertCircle className="w-4 h-4 shrink-0" />
                 <span>{actionError}</span>
               </div>
             )}
 
-            <p className="text-xs text-slate-300">
-              This will refund the amount of <strong className="text-emerald-400">{formatCurrency(selectedOrder.total)}</strong> back to the customer, transition order to <strong className="text-purple-400">CANCELLED</strong>, release inventory if applicable, and log an immutable audit record.
+            <p className="text-xs text-[#A5ABB5] leading-relaxed">
+              This will refund the amount of <strong className="text-[#F5F3EE]">{formatCurrency(selectedOrder.total)}</strong> back to the customer and update the order status.
             </p>
 
             <div>
-              <label className="text-xs font-semibold text-slate-300 block mb-1">Refund Reason</label>
+              <label className="text-xs font-medium text-[#A5ABB5] block mb-1">Reason for refund</label>
               <input
                 type="text"
                 required
                 value={refundReason}
                 onChange={(e) => setRefundReason(e.target.value)}
-                placeholder="e.g. Customer requested return / Damaged goods"
-                className="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500"
+                placeholder="e.g. Customer requested return"
+                className="w-full bg-[#080A0F] border border-[#242A35] rounded-lg px-3 py-2 text-xs text-[#F5F3EE] placeholder-[#6F7682] focus:outline-none focus:border-[#4FB7A5]"
               />
             </div>
 
             <div className="flex justify-end gap-2 pt-2">
               <button
                 onClick={() => setRefundModalOpen(false)}
-                className="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 text-xs font-semibold hover:bg-slate-700"
+                className="px-3.5 py-1.5 rounded-lg bg-[#151922] text-[#A5ABB5] text-xs font-medium hover:text-[#F5F3EE]"
               >
                 Cancel
               </button>
               <button
                 onClick={handleRefund}
                 disabled={actionLoading || !refundReason}
-                className="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-semibold disabled:opacity-50"
+                className="px-3.5 py-1.5 rounded-lg bg-rose-500/90 hover:bg-rose-500 text-white text-xs font-semibold disabled:opacity-50"
               >
-                {actionLoading ? 'Processing Refund...' : 'Confirm Refund'}
+                {actionLoading ? 'Processing refund…' : 'Confirm refund'}
               </button>
             </div>
           </div>

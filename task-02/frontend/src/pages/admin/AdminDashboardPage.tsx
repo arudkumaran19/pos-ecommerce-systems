@@ -8,7 +8,6 @@ import {
   Clock, 
   AlertTriangle, 
   ArrowUpRight, 
-  ShieldCheck, 
   RefreshCw,
   ScrollText
 } from 'lucide-react';
@@ -29,7 +28,7 @@ export const AdminDashboardPage: React.FC = () => {
       setStats(data);
       setError(null);
     } catch (err: any) {
-      setError(err.message || 'Failed to load dashboard metrics');
+      setError(err.message || 'Failed to load store metrics');
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -44,189 +43,181 @@ export const AdminDashboardPage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-indigo-500" />
+      <div className="flex items-center justify-center min-h-[300px]">
+        <div className="animate-spin rounded-full h-8 w-8 border-2 border-[#4FB7A5] border-t-transparent" />
       </div>
     );
   }
 
   return (
-    <div className="space-y-8 max-w-7xl mx-auto">
+    <div className="space-y-6 max-w-7xl mx-auto">
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-semibold mb-2">
-            <ShieldCheck className="w-3.5 h-3.5" />
-            Operations Overview
-          </div>
-          <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
-            Admin Dashboard
+          <h1 className="text-xl sm:text-2xl font-bold text-[#F5F3EE] tracking-tight">
+            Store overview
           </h1>
-          <p className="text-slate-400 text-sm mt-1">
-            Real-time storefront metrics, active reservations, and business activity
+          <p className="text-[#A5ABB5] text-xs mt-0.5">
+            Operational summary of orders, revenue, and customer activity.
           </p>
         </div>
 
         <button
           onClick={() => fetchStats(true)}
           disabled={refreshing}
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 hover:text-white hover:bg-slate-800 text-xs font-semibold transition-all disabled:opacity-50"
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#151922] border border-[#242A35] text-[#A5ABB5] hover:text-[#F5F3EE] hover:bg-[#1C222C] text-xs font-medium transition-colors disabled:opacity-50 cursor-pointer"
         >
           <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? 'animate-spin' : ''}`} />
-          {refreshing ? 'Updating...' : 'Refresh Metrics'}
+          <span>{refreshing ? 'Refreshing…' : 'Refresh'}</span>
         </button>
       </div>
 
       {error && (
-        <div className="p-4 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 text-sm">
+        <div className="p-3.5 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs">
           {error}
         </div>
       )}
 
       {/* KPI Cards Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Total Revenue */}
-        <div className="glass-card p-5 relative overflow-hidden group">
+        <div className="bg-[#10131A] p-5 rounded-xl border border-[#242A35]">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Settled Revenue</span>
-            <div className="w-9 h-9 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center">
+            <span className="text-xs font-medium text-[#A5ABB5]">Settled revenue</span>
+            <div className="w-8 h-8 rounded-lg bg-[#151922] text-[#4FB7A5] flex items-center justify-center border border-[#242A35]">
               <DollarSign className="w-4 h-4" />
             </div>
           </div>
-          <div className="mt-4">
-            <div className="text-2xl font-black text-white">
+          <div className="mt-3">
+            <div className="text-2xl font-bold text-[#F5F3EE] tabular-nums">
               {stats ? formatCurrency(stats.total_revenue) : '$0.00'}
             </div>
-            <p className="text-xs text-slate-500 mt-1">All PAID orders to date</p>
+            <p className="text-[11px] text-[#6F7682] mt-1">Confirmed payments</p>
           </div>
         </div>
 
         {/* Total Orders */}
-        <div className="glass-card p-5 relative overflow-hidden group">
+        <div className="bg-[#10131A] p-5 rounded-xl border border-[#242A35]">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Orders</span>
-            <div className="w-9 h-9 rounded-xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center">
+            <span className="text-xs font-medium text-[#A5ABB5]">Total orders</span>
+            <div className="w-8 h-8 rounded-lg bg-[#151922] text-[#F5F3EE] flex items-center justify-center border border-[#242A35]">
               <ShoppingCart className="w-4 h-4" />
             </div>
           </div>
-          <div className="mt-4">
-            <div className="text-2xl font-black text-white">
+          <div className="mt-3">
+            <div className="text-2xl font-bold text-[#F5F3EE] tabular-nums">
               {stats?.total_orders ?? 0}
             </div>
-            <p className="text-xs text-slate-500 mt-1">
+            <p className="text-[11px] text-[#6F7682] mt-1">
               {stats?.pending_orders ?? 0} awaiting payment
             </p>
           </div>
         </div>
 
-        {/* Active Reservations */}
-        <div className="glass-card p-5 relative overflow-hidden group border-amber-500/30">
+        {/* Active Holds */}
+        <div className="bg-[#10131A] p-5 rounded-xl border border-[#242A35]">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
-              Active Holds
-            </span>
-            <div className="w-9 h-9 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center">
+            <span className="text-xs font-medium text-[#A5ABB5]">Active holds</span>
+            <div className="w-8 h-8 rounded-lg bg-[#151922] text-amber-400 flex items-center justify-center border border-[#242A35]">
               <Clock className="w-4 h-4" />
             </div>
           </div>
-          <div className="mt-4">
-            <div className="text-2xl font-black text-amber-400">
+          <div className="mt-3">
+            <div className="text-2xl font-bold text-amber-300 tabular-nums">
               {stats?.active_reservations ?? 0}
             </div>
-            <p className="text-xs text-slate-500 mt-1">Active checkout reservations</p>
+            <p className="text-[11px] text-[#6F7682] mt-1">Items currently held in checkout</p>
           </div>
         </div>
 
-        {/* Failed / Timeout Payments */}
-        <div className="glass-card p-5 relative overflow-hidden group border-rose-500/30">
+        {/* Failed Payments */}
+        <div className="bg-[#10131A] p-5 rounded-xl border border-[#242A35]">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-rose-400 uppercase tracking-wider">Payment Failures</span>
-            <div className="w-9 h-9 rounded-xl bg-rose-500/10 text-rose-400 flex items-center justify-center">
+            <span className="text-xs font-medium text-[#A5ABB5]">Unsuccessful</span>
+            <div className="w-8 h-8 rounded-lg bg-[#151922] text-rose-400 flex items-center justify-center border border-[#242A35]">
               <AlertTriangle className="w-4 h-4" />
             </div>
           </div>
-          <div className="mt-4">
-            <div className="text-2xl font-black text-rose-400">
+          <div className="mt-3">
+            <div className="text-2xl font-bold text-rose-400 tabular-nums">
               {stats?.failed_payments ?? 0}
             </div>
-            <p className="text-xs text-slate-500 mt-1">Failed or Timed out attempts</p>
+            <p className="text-[11px] text-[#6F7682] mt-1">Failed or expired checkouts</p>
           </div>
         </div>
       </div>
 
       {/* Secondary Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
-        <div className="glass-card p-5 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-blue-500/10 text-blue-400 flex items-center justify-center">
-              <Users className="w-6 h-6" />
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="bg-[#10131A] p-5 rounded-xl border border-[#242A35] flex items-center justify-between">
+          <div className="flex items-center gap-3.5">
+            <div className="w-10 h-10 rounded-lg bg-[#151922] text-[#4FB7A5] flex items-center justify-center border border-[#242A35]">
+              <Users className="w-5 h-5" />
             </div>
             <div>
-              <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider block">Registered Customers</span>
-              <span className="text-2xl font-black text-white">{stats?.total_customers ?? 0}</span>
+              <span className="text-xs font-medium text-[#A5ABB5] block">Customers</span>
+              <span className="text-xl font-bold text-[#F5F3EE] tabular-nums">{stats?.total_customers ?? 0}</span>
             </div>
           </div>
           <Link
             to="/admin/users"
-            className="p-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+            className="p-2 rounded-lg bg-[#151922] border border-[#242A35] text-[#A5ABB5] hover:text-[#F5F3EE] hover:bg-[#1C222C] transition-colors"
+            title="View customers"
           >
-            <ArrowUpRight className="w-5 h-5" />
+            <ArrowUpRight className="w-4 h-4" />
           </Link>
         </div>
 
-        <div className="glass-card p-5 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-purple-500/10 text-purple-400 flex items-center justify-center">
-              <Package className="w-6 h-6" />
+        <div className="bg-[#10131A] p-5 rounded-xl border border-[#242A35] flex items-center justify-between">
+          <div className="flex items-center gap-3.5">
+            <div className="w-10 h-10 rounded-lg bg-[#151922] text-[#F5F3EE] flex items-center justify-center border border-[#242A35]">
+              <Package className="w-5 h-5" />
             </div>
             <div>
-              <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider block">Catalog Products</span>
-              <span className="text-2xl font-black text-white">{stats?.total_products ?? 0}</span>
+              <span className="text-xs font-medium text-[#A5ABB5] block">Products</span>
+              <span className="text-xl font-bold text-[#F5F3EE] tabular-nums">{stats?.total_products ?? 0}</span>
             </div>
           </div>
           <Link
             to="/admin/products"
-            className="p-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+            className="p-2 rounded-lg bg-[#151922] border border-[#242A35] text-[#A5ABB5] hover:text-[#F5F3EE] hover:bg-[#1C222C] transition-colors"
+            title="View products"
           >
-            <ArrowUpRight className="w-5 h-5" />
+            <ArrowUpRight className="w-4 h-4" />
           </Link>
         </div>
       </div>
 
-      {/* Control Panels & Quick Actions */}
-      <div className="glass-card p-6 sm:p-8 space-y-6">
-        <div className="flex items-center justify-between border-b border-slate-800/80 pb-4">
-          <h2 className="text-lg font-bold text-white">Management Shortcuts</h2>
-          <span className="text-xs text-slate-500">Fast access to administrative controls</span>
-        </div>
+      {/* Quick Navigation Panels */}
+      <div className="bg-[#10131A] p-5 sm:p-6 rounded-xl border border-[#242A35] space-y-4">
+        <h2 className="text-sm font-semibold text-[#F5F3EE]">Quick navigation</h2>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <Link
-            to="/admin/users"
-            className="p-4 rounded-xl bg-slate-900/60 border border-slate-800/80 hover:border-indigo-500/40 hover:bg-slate-900 transition-all group"
+            to="/admin/orders"
+            className="p-4 rounded-lg bg-[#151922] border border-[#242A35] hover:border-[#323B4A] transition-colors group"
           >
-            <Users className="w-5 h-5 text-indigo-400 mb-2 group-hover:scale-110 transition-transform" />
-            <h3 className="text-sm font-bold text-white group-hover:text-indigo-400 transition-colors">Customer Directory</h3>
-            <p className="text-xs text-slate-400 mt-1">Manage accounts, status flags, and administrative password resets.</p>
+            <ShoppingCart className="w-4 h-4 text-[#4FB7A5] mb-2" />
+            <h3 className="text-xs font-semibold text-[#F5F3EE]">Orders</h3>
+            <p className="text-[11px] text-[#A5ABB5] mt-0.5">Manage customer orders, view payment receipts, and issue refunds.</p>
           </Link>
 
           <Link
             to="/admin/products"
-            className="p-4 rounded-xl bg-slate-900/60 border border-slate-800/80 hover:border-indigo-500/40 hover:bg-slate-900 transition-all group"
+            className="p-4 rounded-lg bg-[#151922] border border-[#242A35] hover:border-[#323B4A] transition-colors group"
           >
-            <Package className="w-5 h-5 text-purple-400 mb-2 group-hover:scale-110 transition-transform" />
-            <h3 className="text-sm font-bold text-white group-hover:text-purple-400 transition-colors">Inventory Control</h3>
-            <p className="text-xs text-slate-400 mt-1">Adjust stock levels, create new catalog items, and edit product pricing.</p>
+            <Package className="w-4 h-4 text-[#4FB7A5] mb-2" />
+            <h3 className="text-xs font-semibold text-[#F5F3EE]">Products</h3>
+            <p className="text-[11px] text-[#A5ABB5] mt-0.5">Manage catalog inventory, update pricing, and add products.</p>
           </Link>
 
           <Link
             to="/admin/audit-logs"
-            className="p-4 rounded-xl bg-slate-900/60 border border-slate-800/80 hover:border-indigo-500/40 hover:bg-slate-900 transition-all group"
+            className="p-4 rounded-lg bg-[#151922] border border-[#242A35] hover:border-[#323B4A] transition-colors group"
           >
-            <ScrollText className="w-5 h-5 text-cyan-400 mb-2 group-hover:scale-110 transition-transform" />
-            <h3 className="text-sm font-bold text-white group-hover:text-cyan-400 transition-colors">Immutable Audit Logs</h3>
-            <p className="text-xs text-slate-400 mt-1">Inspect forensic audit records with actor IDs, IPs, and before/after payloads.</p>
+            <ScrollText className="w-4 h-4 text-[#4FB7A5] mb-2" />
+            <h3 className="text-xs font-semibold text-[#F5F3EE]">Audit logs</h3>
+            <p className="text-[11px] text-[#A5ABB5] mt-0.5">Review operational history and administrative actions.</p>
           </Link>
         </div>
       </div>
