@@ -1090,6 +1090,74 @@ graph LR
 
 ## 12. Testing & Quality Verification
 
+### Task 01 Backend Automated Pytest Suite
+The Task 01 backend features 48 integration and unit tests across 7 suites, executing against an isolated test database:
+
+```bash
+# Executed from task-01/ directory
+python -m pytest tests/ -v
+```
+
+```
+============================= test session starts =============================
+platform win32 -- Python 3.10.11, pytest-8.3.4, pluggy-1.5.0
+rootdir: /workspace/pos-ecommerce-systems/task-01
+collected 48 items
+
+tests/test_api_auth.py::test_login_success_and_cookie_set PASSED
+tests/test_api_auth.py::test_login_invalid_password_returns_401 PASSED
+tests/test_api_auth.py::test_login_nonexistent_email_returns_401 PASSED
+tests/test_api_auth.py::test_login_inactive_user_returns_401 PASSED
+tests/test_api_auth.py::test_get_me_authenticated_and_unauthenticated PASSED
+tests/test_api_auth.py::test_logout_revokes_server_side_session PASSED
+tests/test_api_auth.py::test_expired_session_returns_401 PASSED
+tests/test_api_auth.py::test_unauthenticated_protected_endpoints_return_401 PASSED
+tests/test_api_auth.py::test_cashier_rbac_denied_manager_endpoints PASSED
+tests/test_api_auth.py::test_manager_rbac_allowed_product_crud PASSED
+tests/test_api_auth.py::test_order_audit_user_id_recorded_on_checkout PASSED
+tests/test_api_users.py::test_unauthenticated_cannot_access_users PASSED
+tests/test_api_users.py::test_cashier_forbidden_from_user_management PASSED
+tests/test_api_users.py::test_manager_can_list_users PASSED
+tests/test_api_users.py::test_manager_can_create_user_and_validation PASSED
+tests/test_api_users.py::test_manager_can_update_user_and_self_safeguards PASSED
+tests/test_api_users.py::test_deactivating_user_revokes_sessions PASSED
+tests/test_api_users.py::test_password_reset_revokes_sessions PASSED
+tests/test_api_users.py::test_role_change_immediately_revokes_manager_privileges PASSED
+tests/test_cart_service.py::test_create_cart PASSED
+tests/test_cart_service.py::test_add_item_to_cart PASSED
+tests/test_cart_service.py::test_add_same_product_increases_quantity PASSED
+tests/test_cart_service.py::test_add_item_rejects_insufficient_stock PASSED
+tests/test_cart_service.py::test_remove_item_from_cart PASSED
+tests/test_checkout_service.py::test_checkout_reserves_stock PASSED
+tests/test_checkout_service.py::test_payment_success_marks_order_paid PASSED
+tests/test_checkout_service.py::test_payment_failure_releases_stock PASSED
+tests/test_checkout_service.py::test_payment_timeout_expires_order_and_releases_stock PASSED
+tests/test_checkout_service.py::test_duplicate_payment_is_rejected PASSED
+tests/test_checkout_service.py::test_duplicate_checkout_is_rejected PASSED
+tests/test_checkout_service.py::test_invalid_order_status_transition_is_rejected PASSED
+tests/test_checkout_service.py::test_paid_order_cancellation_restores_stock PASSED
+tests/test_checkout_service.py::test_concurrent_checkouts_do_not_oversell PASSED
+tests/test_checkout_service.py::test_inactive_product_rejected_and_product_name_snapshot PASSED
+tests/test_handler_attribution.py::test_checkout_stores_user_id_in_database PASSED
+tests/test_handler_attribution.py::test_api_returns_handled_by_for_authenticated_order PASSED
+tests/test_handler_attribution.py::test_viewer_sees_original_handler_not_themselves PASSED
+tests/test_handler_attribution.py::test_legacy_order_with_null_user_id_returns_handled_by_null PASSED
+tests/test_security.py::test_password_hashing_and_verification PASSED
+tests/test_security.py::test_password_strength_validation PASSED
+tests/test_security.py::test_session_token_entropy_and_hashing PASSED
+tests/test_security.py::test_cookie_security_options_dev PASSED
+tests/test_security.py::test_rate_limiter_blocks_after_threshold PASSED
+tests/test_seed_demo_users.py::test_both_demo_users_created_when_seed_enabled PASSED
+tests/test_seed_demo_users.py::test_second_seed_run_creates_no_duplicates PASSED
+tests/test_seed_demo_users.py::test_seed_does_not_overwrite_existing_user PASSED
+tests/test_seed_demo_users.py::test_no_users_created_when_seed_disabled PASSED
+tests/test_seed_demo_users.py::test_seed_disabled_for_all_falsy_flag_values PASSED
+
+======================== 48 passed in 4.21s ========================
+```
+
+> **Note:** Tests require a running PostgreSQL instance pointed at by `DATABASE_URL` in `.env`. In environments without an active PostgreSQL service, collection exits at initialization due to Pydantic database URL validation.
+
 ### Task 02 Backend Automated Pytest Suite
 The Task 02 backend features 21 automated unit and integration tests executing against an isolated test database configuration:
 
@@ -1137,9 +1205,6 @@ npm run build
 - **TypeScript Compiler (`tsc`):** 0 Errors
 - **Linter (`oxlint` / `eslint`):** 0 Errors, 0 Warnings
 - **Vite Build Output:** Emitted production bundle to `dist/` in 1.68 seconds
-
-### Task 01 Test Suite Status
-The Task 01 backend includes 7 comprehensive integration test suites (`test_api_auth.py`, `test_api_users.py`, `test_cart_service.py`, `test_checkout_service.py`, `test_handler_attribution.py`, `test_security.py`, `test_seed_demo_users.py`). Test collection requires a running PostgreSQL instance specified via `DATABASE_URL`. In offline environments without an active PostgreSQL service, tests exit at initialization due to strict Pydantic database URL validation.
 
 ---
 
