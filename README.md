@@ -28,20 +28,20 @@
 > The live demonstration environments for both Task 01 (Render + Vercel) and Task 02 (Railway + Vercel) are provisioned on cloud provider evaluation tiers specifically for the TechLoom Software Engineer assessment review:
 > - **30-Day Deployment Validity:** Free-tier compute containers and cloud database instances will remain active for the assessment evaluation window (30 days from deployment).
 > - **Cold-Start Latency:** Free-tier application containers (particularly on Render and Railway) automatically spin down during periods of inactivity. If an endpoint has not received recent traffic, the initial HTTP request may experience a brief 30-50 second cold-start wake-up latency before resuming sub-second response times.
-> - **Local Reproducibility:** Full local development and containerization environments are maintained in this repository. If cloud instances expire or enter sleep mode, both systems can be launched locally with zero external network dependencies using the instructions in [Section 14: Local Development & Environment Setup](#14-local-development--environment-setup).
+> - **Local Reproducibility:** Full local development and containerization environments are maintained in this repository. If cloud instances expire or enter sleep mode, both systems can be launched locally with zero external network dependencies using the instructions in [Section 15: Local Development & Environment Setup](#15-local-development--environment-setup).
 
 ---
 
 ## 2. Demo Credentials
 
-### Task 01 · POS System
+### Task 01 | POS System
 
 | Role | Email | Password |
 |---|---|---|
 | Cashier | `cashier@techloom.com` | `CashierPass123!` |
 | Manager | `manager@techloom.com` | `ManagerPass123!` |
 
-### Task 02 · E-Commerce Storefront
+### Task 02 | E-Commerce Storefront
 
 | Role | Email | Password |
 |---|---|---|
@@ -54,23 +54,23 @@
 
 1. [Quick Links & Live Demonstrations](#1-quick-links--live-demonstrations)
 2. [Demo Credentials](#2-demo-credentials)
-2. [Executive Summary & Architectural Independence](#2-executive-summary--architectural-independence)
-3. [Assessment Requirements Overview](#3-assessment-requirements-overview)
-4. [Repository Structure](#4-repository-structure)
-5. [Task 01: POS Order & Inventory System](#5-task-01-pos-order--inventory-system)
+3. [Executive Summary & Architectural Independence](#3-executive-summary--architectural-independence)
+4. [Assessment Requirements Overview](#4-assessment-requirements-overview)
+5. [Repository Structure](#5-repository-structure)
+6. [Task 01: POS Order & Inventory System](#6-task-01-pos-order--inventory-system)
    - [Objective & Core Features](#task-01-objective--core-features)
    - [System Architecture](#task-01-system-architecture)
    - [Checkout Sequence Flow](#task-01-checkout-sequence-flow)
-   - [High-Concurrency Lock Ordering & Race Prevention](#task-01-concurrency-protection)
+   - [Concurrency Protection & Row Locking](#task-01-concurrency-protection)
    - [Reservation State Machine](#task-01-reservation-state-machine)
    - [Payment Processing Flow](#task-01-payment-flow)
    - [Database Schema & ER Diagram](#task-01-database-schema)
-   - [API Surface Reference](#task-01-api-surface)
-6. [Task 02: Enterprise E-Commerce Platform](#6-task-02-enterprise-e-commerce-platform)
+   - [API Surface Reference](#task-01-api-surface-reference)
+7. [Task 02: Enterprise E-Commerce Platform](#7-task-02-enterprise-e-commerce-platform)
    - [Objective & Customer Journey](#task-02-objective--customer-journey)
-   - [Admin Back-Office Application Shell](#task-02-admin-console)
+   - [Admin Back-Office Application Shell](#task-02-admin-console--application-shell)
    - [System Architecture](#task-02-system-architecture)
-   - [Database Schema & ER Diagram](#task-02-database-schema)
+   - [Database Schema & ER Diagram](#task-02-database-schema-enterprise-entity-relationship)
    - [Checkout Sequence Flow](#task-02-checkout-sequence)
    - [Reservation State Machine](#task-02-reservation-lifecycle)
    - [Payment State Machine & Transitions](#task-02-payment-state-machine)
@@ -80,26 +80,26 @@
    - [Role-Based Access Control & Safeguards](#task-02-admin-rbac-and-safeguards)
    - [Order Cancellation & Refund Workflow](#task-02-cancellation-and-refund-workflow)
    - [Audit Logging Architecture](#task-02-audit-logging-architecture)
-   - [API Surface Reference](#task-02-api-surface)
-7. [Production Deployment Architecture](#7-production-deployment-architecture)
-8. [Technology Stack Comparison](#8-technology-stack-comparison)
-9. [Feature Comparison Matrix](#9-feature-comparison-matrix)
-10. [Assessment Requirement Traceability Matrix](#10-assessment-requirement-traceability-matrix)
-11. [Testing & Quality Verification](#11-testing--quality-verification)
-12. [Engineering Quality Pillars](#12-engineering-quality-pillars)
-13. [UI/UX Design Philosophy & Journeys](#13-uiux-design-philosophy--journeys)
-14. [Local Development & Environment Setup](#14-local-development--environment-setup)
-15. [Environment Variables Reference](#15-environment-variables-reference)
-16. [Responsive Design & Viewport QA Matrix](#16-responsive-design--viewport-qa-matrix)
-17. [Security Implementation Matrix](#17-security-implementation-matrix)
-18. [State Machine Comparative Analysis](#18-state-machine-comparative-analysis)
-19. [Architectural Decisions & Technical Rationales](#19-architectural-decisions--technical-rationales)
-20. [Known Limitations & Design Boundaries](#20-known-limitations--design-boundaries)
-21. [Final Verification & Submission Report](#21-final-verification--submission-report)
+   - [API Surface Reference](#task-02-api-surface-reference)
+8. [Production Deployment Architecture](#8-production-deployment-architecture)
+9. [Technology Stack Comparison](#9-technology-stack-comparison)
+10. [Feature Comparison Matrix](#10-feature-comparison-matrix)
+11. [Assessment Requirement Traceability Matrix](#11-assessment-requirement-traceability-matrix)
+12. [Testing & Quality Verification](#12-testing--quality-verification)
+13. [Engineering Quality Pillars](#13-engineering-quality-pillars)
+14. [UI/UX Design Philosophy & Journeys](#14-uiux-design-philosophy--journeys)
+15. [Local Development & Environment Setup](#15-local-development--environment-setup)
+16. [Environment Variables Reference](#16-environment-variables-reference)
+17. [Responsive Design & Viewport QA Matrix](#17-responsive-design--viewport-qa-matrix)
+18. [Security Implementation Matrix](#18-security-implementation-matrix)
+19. [State Machine Comparative Analysis](#19-state-machine-comparative-analysis)
+20. [Architectural Decisions & Technical Rationales](#20-architectural-decisions--technical-rationales)
+21. [Known Limitations & Design Boundaries](#21-known-limitations--design-boundaries)
+22. [Final Verification & Submission Report](#22-final-verification--submission-report)
 
 ---
 
-## 2. Executive Summary & Architectural Independence
+## 3. Executive Summary & Architectural Independence
 
 This repository contains two independently realized commerce systems designed to fulfill the **TechLoom Software Engineer Intern Practical Assessment**:
 
@@ -146,7 +146,7 @@ graph TB
 
 ---
 
-## 3. Assessment Requirements Overview
+## 4. Assessment Requirements Overview
 
 | Assessment Category | Task 01: POS Order & Inventory System | Task 02: E-Commerce Platform |
 | :--- | :--- | :--- |
@@ -165,7 +165,7 @@ graph TB
 
 ---
 
-## 4. Repository Structure
+## 5. Repository Structure
 
 ```
 techloom-software-engineer-assessment/
@@ -217,7 +217,7 @@ techloom-software-engineer-assessment/
 
 ---
 
-## 5. Task 01: POS Order & Inventory System
+## 6. Task 01: POS Order & Inventory System
 
 ### Task 01: Objective & Core Features
 Engineered specifically for physical store checkout registers, the POS system coordinates fast transaction completion while ensuring inventory integrity:
@@ -461,7 +461,7 @@ erDiagram
 
 ---
 
-## 6. Task 02: Enterprise E-Commerce Platform
+## 7. Task 02: Enterprise E-Commerce Platform
 
 ### Task 02: Objective & Customer Journey
 Designed as an online retail boutique and administrative system:
@@ -937,7 +937,7 @@ flowchart LR
 
 ---
 
-## 7. Production Deployment Architecture
+## 8. Production Deployment Architecture
 
 ```mermaid
 graph LR
@@ -978,7 +978,7 @@ graph LR
 
 ---
 
-## 8. Technology Stack Comparison
+## 9. Technology Stack Comparison
 
 | Layer | Task 01: POS Order System | Task 02: Enterprise E-Commerce Platform |
 | :--- | :--- | :--- |
@@ -1001,7 +1001,7 @@ graph LR
 
 ---
 
-## 9. Feature Comparison Matrix
+## 10. Feature Comparison Matrix
 
 | Feature / Capability | Task 01 (POS System) | Task 02 (E-Commerce Platform) |
 | :--- | :---: | :---: |
@@ -1026,7 +1026,7 @@ graph LR
 
 ---
 
-## 10. Assessment Requirement Traceability Matrix
+## 11. Assessment Requirement Traceability Matrix
 
 | Assessment Requirement | Task | Implementation Module / File | Verification & Test Evidence |
 | :--- | :---: | :--- | :--- |
@@ -1049,7 +1049,7 @@ graph LR
 
 ---
 
-## 11. Testing & Quality Verification
+## 12. Testing & Quality Verification
 
 ### Task 02 Backend Automated Pytest Suite
 The Task 02 backend features 21 automated unit and integration tests executing against an isolated test database configuration:
@@ -1104,7 +1104,7 @@ The Task 01 backend includes 7 comprehensive integration test suites (`test_api_
 
 ---
 
-## 12. Engineering Quality Pillars
+## 13. Engineering Quality Pillars
 
 ### 1. Reliability & Data Consistency
 - **Atomic State Boundaries:** All checkout operations (locking, stock decrement, reservation creation, cart status update) execute within a single transaction boundary.
@@ -1124,7 +1124,7 @@ The Task 01 backend includes 7 comprehensive integration test suites (`test_api_
 
 ---
 
-## 13. UI/UX Design Philosophy & Journeys
+## 14. UI/UX Design Philosophy & Journeys
 
 The Task 02 user interface is crafted as a real-world commerce experience emphasizing trust, clarity, and predictable navigation:
 
@@ -1155,7 +1155,7 @@ flowchart TD
 
 ---
 
-## 14. Local Development & Environment Setup
+## 15. Local Development & Environment Setup
 
 ### Prerequisites
 - **Python:** 3.10 or higher
@@ -1247,7 +1247,7 @@ npm run dev -- --port 5173
 
 ---
 
-## 15. Environment Variables Reference
+## 16. Environment Variables Reference
 
 ### Task 01 Backend Environment Variables
 | Variable | Purpose | Required | Example / Default |
@@ -1285,7 +1285,7 @@ npm run dev -- --port 5173
 
 ---
 
-## 16. Responsive Design & Viewport QA Matrix
+## 17. Responsive Design & Viewport QA Matrix
 
 The Task 02 user interface has been verified against standard device viewports and zoom configurations:
 
@@ -1312,7 +1312,7 @@ The Task 02 user interface has been verified against standard device viewports a
 
 ---
 
-## 17. Security Implementation Matrix
+## 18. Security Implementation Matrix
 
 | Security Domain | Task 01: POS Order System | Task 02: Enterprise E-Commerce Platform |
 | :--- | :--- | :--- |
@@ -1329,7 +1329,7 @@ The Task 02 user interface has been verified against standard device viewports a
 
 ---
 
-## 18. State Machine Comparative Analysis
+## 19. State Machine Comparative Analysis
 
 ```mermaid
 graph TD
@@ -1353,7 +1353,7 @@ graph TD
 
 ---
 
-## 19. Architectural Decisions & Technical Rationales
+## 20. Architectural Decisions & Technical Rationales
 
 ### 1. Database-Level Row Locking (`SELECT ... FOR UPDATE`)
 - **Context:** Multiple shoppers or cashiers can attempt to purchase the same inventory items simultaneously.
@@ -1377,7 +1377,7 @@ graph TD
 
 ---
 
-## 20. Known Limitations & Design Boundaries
+## 21. Known Limitations & Design Boundaries
 
 1. **Simulated Payment Gateway:** The payment processing engine simulates gateway responses (`SUCCESS`, `FAILURE`, `TIMEOUT`) to facilitate end-to-end automated testing without requiring live merchant gateway contracts (e.g. Stripe or Adyen). The state machine and idempotency behaviors are identical to production payment integrations.
 2. **Transactional Email in Local Development:** The Resend email provider requires a valid `RESEND_API_KEY`. When running locally without a configured key, password reset tokens are generated and committed to the database but email delivery is bypassed.
@@ -1385,7 +1385,7 @@ graph TD
 
 ---
 
-## 21. Final Verification & Submission Report
+## 22. Final Verification & Submission Report
 
 - **Documentation Scope:** Single, exhaustive, root-level `README.md` created at `C:\Users\arudk\Downloads\techloom-software-engineer-assessment\README.md`.
 - **Application Code Integrity:** Zero application code modified; documentation generated purely from verified repository facts.
