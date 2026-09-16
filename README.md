@@ -171,47 +171,68 @@ graph TB
 pos-ecommerce-systems/
 ├── README.md                            # Comprehensive Root Documentation (This File)
 ├── task-01/                             # Task 01: POS Order & Inventory System
+│   ├── alembic/                         # Database Schema Migrations (7 Versioned Revisions)
 │   ├── app/
-│   │   ├── api/                         # FastAPI Route Handlers (auth, cart, checkout, etc.)
-│   │   ├── core/                        # Database Engine, Session & Security Utilities
-│   │   ├── models/                      # SQLAlchemy Integer PK Models (Product, Order, etc.)
+│   │   ├── api/                         # FastAPI Route Handlers (auth, carts, orders, payments, products, users)
+│   │   ├── core/                        # Database Engine, Config & Security Utilities
+│   │   ├── db/                          # SQLAlchemy Engine & Session Factory (session.py, base.py)
+│   │   ├── models/                      # Integer PK Models (Product, Order, Reservation, Cart, User, etc.)
+│   │   ├── repositories/                # Data Access Repositories (cart, inventory, order, payment, product)
 │   │   ├── schemas/                     # Pydantic Request/Response Data Contracts
 │   │   └── services/                    # Checkout, Inventory & 5s Expiry Worker
 │   ├── frontend/
-│   │   ├── src/                         # React 19 + Tailwind v4 Single-Page Terminal
-│   │   │   ├── components/              # Cashier, Inventory, History & User Views
-│   │   │   ├── App.tsx                  # Main POS Application Router & State Container
-│   │   │   └── main.tsx                 # Entry Point
+│   │   ├── src/                         # React 19 + Tailwind v4 Single-Page POS Terminal
+│   │   │   ├── assets/                  # Product WebP Imagery & Brand Assets
+│   │   │   ├── components/              # Cashier Register, Inventory, History & User Modals
+│   │   │   ├── context/                 # AuthContext (Session State Management)
+│   │   │   ├── lib/                     # API Client & Product Catalog Helpers
+│   │   │   ├── types/                   # TypeScript Interfaces & Contract Models
+│   │   │   ├── App.tsx                  # POS Layout Router & State Container
+│   │   │   └── main.tsx                 # React App Entry Point
 │   │   ├── package.json                 # React 19, Vite 8, Tailwind v4
 │   │   └── vite.config.ts
 │   ├── tests/                           # 7 Pytest Integration Test Modules
+│   ├── alembic.ini                      # Migration Configuration
 │   ├── docker-compose.yml               # Local PostgreSQL 16 Service Definition
-│   ├── requirements.txt                 # Backend Dependencies (FastAPI, SQLAlchemy, bcrypt)
-│   └── pytest.ini
+│   ├── openapi-contract.json            # Static OpenAPI Schema Contract
+│   ├── requirements.txt                 # Backend Dependencies (FastAPI, SQLAlchemy, psycopg, bcrypt)
+│   ├── pytest.ini
+│   └── .env.example                     # Environment Variable Template
 │
 └── task-02/                             # Task 02: Enterprise E-Commerce Platform
     ├── backend/
     │   ├── alembic/                     # Database Schema Migrations
     │   ├── app/
-    │   │   ├── api/
-    │   │   │   ├── admin/               # Admin Endpoints (audit_logs, orders, products, users)
-    │   │   │   ├── storefront/          # Storefront Endpoints (auth, cart, checkout, payments)
-    │   │   │   └── router.py            # Central Aggregator Router
+    │   │   ├── api/                     # Dependencies & Versioned Route Aggregators
+    │   │   │   ├── v1/                  # API v1 Endpoints (auth, cart, checkout, profile, etc.)
+    │   │   │   │   ├── admin/           # Admin Endpoints (audit_logs, orders, products, stats, users)
+    │   │   │   │   └── router.py        # Central Aggregator Router (/api/v1)
+    │   │   │   └── deps.py              # Auth & Database Injection Dependencies
     │   │   ├── core/                    # Argon2id, Config, Session Manager & DB Engine
     │   │   ├── models/                  # UUIDv4 Models (User, Product, Order, AuditLog, etc.)
+    │   │   ├── repositories/            # Data Access Repositories (user, cart, order, audit, etc.)
     │   │   ├── schemas/                 # Strict Pydantic Data Contracts
-    │   │   └── services/                # Sweeper Service (15s), Checkout & Resend Client
-    │   ├── tests/                       # 21 Passing Pytest Integration Tests
-    │   ├── requirements.txt             # Backend Dependencies (argon2-cffi, Resend, etc.)
+    │   │   └── services/                # Sweeper Service (15s), Checkout, Payments & Email Client
+    │   ├── tests/                       # 21 Passing Pytest Integration & Unit Tests
+    │   │   ├── integration/             # RBAC, Concurrency, Sweeper, Idempotency, Session Tests
+    │   │   └── unit/                    # Argon2, Resend Email & Monetary Math Tests
+    │   ├── alembic.ini                  # Migration Configuration
+    │   ├── requirements.txt             # Backend Dependencies (argon2-cffi, Resend, Pillow, etc.)
+    │   ├── pytest.ini
+    │   ├── runtime.txt
     │   └── .env.example                 # Environment Variable Template
     └── frontend/
         ├── src/
-        │   ├── components/              # Navigation, Modals & UI Atoms
-        │   ├── layouts/                 # AdminLayout (Fixed Shell) & CheckoutLayout
-        │   ├── pages/                   # Storefront, Checkout, Orders & Admin Pages
-        │   ├── services/                # Axios API Client with CSRF Interceptors
-        │   └── types/                   # TypeScript Interfaces & Enums
+        │   ├── components/              # Storefront Atoms, Modals & layout/ (AdminLayout, Navbar)
+        │   ├── context/                 # AuthContext, CartContext & ToastContext
+        │   ├── lib/                     # Axios/Fetch API Client with CSRF Interceptor & Formatters
+        │   ├── pages/                   # Storefront, Checkout, Account, Orders & Admin Pages
+        │   ├── types/                   # TypeScript Interfaces & Enums
+        │   ├── App.tsx                  # Application Shell Router (React Router v7)
+        │   └── main.tsx                 # React App Entry Point
         ├── package.json                 # React 19, Vite 8, Tailwind v3, React Router v7
+        ├── tailwind.config.js
+        ├── vercel.json
         └── vite.config.ts
 ```
 
@@ -267,7 +288,7 @@ sequenceDiagram
     participant Expiry as Expiry Worker (5s)
 
     Cashier->>POS: Review Cart & Click Checkout
-    POS->>API: POST /api/checkout {cart_id}
+    POS->>API: POST /carts/{cart_id}/checkout
     Note over API,DB: Transaction Begins
     API->>DB: SELECT * FROM carts WHERE id = :cart_id FOR UPDATE
     API->>DB: SELECT * FROM products WHERE id IN (:ids) ORDER BY id ASC FOR UPDATE
@@ -282,7 +303,7 @@ sequenceDiagram
 
     alt Payment Succeeded within 5 mins
         Cashier->>POS: Tender Payment
-        POS->>API: POST /api/payments {order_id, idempotency_key, outcome='SUCCESS'}
+        POS->>API: POST /payments/orders/{order_id} {idempotency_key, outcome='SUCCESS'}
         API->>DB: Verify idempotency_key uniqueness
         API->>DB: UPDATE orders SET status = 'Paid', completed_at = NOW()
         API->>DB: UPDATE reservations SET status = 'Consumed'
@@ -344,7 +365,7 @@ stateDiagram-v2
 
 ```mermaid
 flowchart TD
-    PayAttempt["Payment Initiated<br/>POST /api/payments"] --> ValidateTTL{"Is Reservation Active & Unexpired?"}
+    PayAttempt["Payment Initiated<br/>POST /payments/orders/{order_id}"] --> ValidateTTL{"Is Reservation Active & Unexpired?"}
     ValidateTTL -- No (Expired) --> ExpireFail["Release Reservation & Stock<br/>Return HTTP 409 Conflict"]
     ValidateTTL -- Yes --> CheckIdemp{"Is Idempotency Key Seen?"}
     CheckIdemp -- Seen on Same Order --> ReturnCached["Return Cached Payment Result"]
@@ -446,18 +467,27 @@ erDiagram
 
 | Method | Path | Auth Required | Description |
 | :--- | :--- | :--- | :--- |
-| `POST` | `/api/auth/login` | Public | Validates credentials and sets session cookie |
-| `POST` | `/api/auth/logout` | Authenticated | Revokes current session |
-| `GET` | `/api/auth/me` | Authenticated | Returns current authenticated user profile |
-| `GET` | `/api/products` | Cashier, Manager | Returns active catalog with stock levels |
-| `POST` | `/api/products` | Manager | Creates new product with stock validation |
-| `POST` | `/api/cart` | Cashier | Initializes active checkout cart |
-| `POST` | `/api/cart/items` | Cashier | Adds product item to cart |
-| `DELETE` | `/api/cart/items/{id}` | Cashier | Removes product item from cart |
-| `POST` | `/api/checkout` | Cashier | Concurrency-locked stock reservation |
-| `POST` | `/api/payments` | Cashier | Idempotent payment processing with TTL check |
-| `GET` | `/api/orders` | Cashier, Manager | Retrieves chronological order history |
-| `GET` | `/api/orders/{id}` | Cashier, Manager | Retrieves detailed order items and payment status |
+| `POST` | `/auth/login` | Public | Validates credentials and sets session cookie |
+| `POST` | `/auth/logout` | Authenticated | Revokes current session |
+| `GET` | `/auth/me` | Authenticated | Returns current authenticated user profile |
+| `GET` | `/users` | Manager | Lists all registered operators |
+| `POST` | `/users` | Manager | Creates a new operator account |
+| `PATCH` | `/users/{id}` | Manager | Updates operator display name, role, or active status |
+| `GET` | `/products` | Cashier, Manager | Returns active catalog with stock levels |
+| `POST` | `/products` | Manager | Creates new product with stock validation |
+| `GET` | `/products/{id}` | Cashier, Manager | Retrieves product details |
+| `PATCH` | `/products/{id}` | Manager | Updates product price, stock, or active status |
+| `DELETE` | `/products/{id}` | Manager | Deactivates or removes a product |
+| `POST` | `/carts` | Cashier | Initializes active checkout cart |
+| `GET` | `/carts/{id}` | Cashier | Retrieves active cart contents |
+| `POST` | `/carts/{id}/items` | Cashier | Adds product item to cart |
+| `PATCH` | `/carts/{id}/items/{item_id}` | Cashier | Updates cart item quantity |
+| `DELETE` | `/carts/{id}/items/{item_id}` | Cashier | Removes product item from cart |
+| `POST` | `/carts/{cart_id}/checkout` | Cashier | Concurrency-locked stock reservation |
+| `POST` | `/payments/orders/{order_id}` | Cashier | Idempotent payment processing with TTL check |
+| `GET` | `/orders` | Cashier, Manager | Retrieves chronological order history |
+| `GET` | `/orders/{id}` | Cashier, Manager | Retrieves detailed order items and payment status |
+| `POST` | `/orders/{id}/cancel` | Cashier, Manager | Cancels unfulfilled order and restores reserved stock |
 
 ---
 
@@ -495,8 +525,8 @@ graph TD
     API["FastAPI Backend Server<br/>(Port 8001 / Railway PaaS)"]
 
     subgraph BackendLayers ["FastAPI Layered Architecture"]
-        Router["Central Aggregator Router<br/>(app/api/router.py)"]
-        StoreAPIs["Storefront Routers<br/>(auth, cart, checkout, payments, profile)"]
+        Router["Central Aggregator Router<br/>(app/api/v1/router.py)"]
+        StoreAPIs["Storefront Routers<br/>(auth, cart, checkout, payments, profile, orders)"]
         AdminAPIs["Admin Routers<br/>(stats, users, products, orders, audit_logs)"]
         
         subgraph Services ["Domain Services Layer"]
@@ -505,7 +535,7 @@ graph TD
             PaymentService["Payment & Idempotency Service"]
             SweeperService["Periodic Sweeper Task (15s Loop)"]
             AuditService["Immutable JSONB Audit Service"]
-            ResendService["Resend Email Dispatch Client"]
+            EmailService["Transactional Email Service<br/>(app/services/email_service.py)"]
         end
         
         Alembic["Alembic Database Migrations"]
@@ -523,7 +553,7 @@ graph TD
     AdminAPIs --> Services
     Services -->|psycopg2-binary| Postgres
     SweeperService -->|SELECT FOR UPDATE SKIP LOCKED| Postgres
-    ResendService -->|HTTPS API| ResendCloud
+    EmailService -->|HTTPS API| ResendCloud
 ```
 
 ### Task 02: Database Schema (Enterprise Entity-Relationship)
@@ -690,7 +720,7 @@ sequenceDiagram
 
     Customer->>UI: Reviews Cart & Enters Shipping Address
     Customer->>UI: Clicks "Complete Checkout"
-    UI->>API: POST /api/storefront/checkout {shipping_address, idempotency_key}
+    UI->>API: POST /api/v1/checkout {shipping_address, idempotency_key}
     Note over API,DB: Transaction Begins
     API->>DB: Lock Cart (FOR UPDATE)
     API->>DB: Lock Products in ascending UUID order (FOR UPDATE)
@@ -703,7 +733,7 @@ sequenceDiagram
     API-->>UI: 201 Created {order_id, reservation_ttl: 300}
 
     Customer->>UI: Enters Payment Details & Authorizes
-    UI->>API: POST /api/storefront/payments {order_id, idempotency_key, outcome}
+    UI->>API: POST /api/v1/payments {order_id, idempotency_key, outcome}
     API->>DB: Check IdempotencyRecord (Prevent duplicate execution)
     alt Payment Succeeded
         API->>DB: Update Payment -> SUCCEEDED
@@ -754,7 +784,7 @@ sequenceDiagram
     participant API as FastAPI Backend
     participant DB as PostgreSQL
 
-    Client->>API: POST /api/storefront/payments (Header: X-Idempotency-Key: uuid-123)
+    Client->>API: POST /api/v1/payments (Header: X-Idempotency-Key: uuid-123)
     API->>DB: SELECT * FROM idempotency_records WHERE key = 'uuid-123'
     alt Key Not Found
         API->>DB: INSERT INTO idempotency_records (key='uuid-123', request_hash=sha256(body), status='IN_PROGRESS')
@@ -774,7 +804,7 @@ sequenceDiagram
 
 ```mermaid
 flowchart TD
-    User([Customer or Admin]) --> LoginReq[POST /api/storefront/auth/login<br/>email + password]
+    User([Customer or Admin]) --> LoginReq[POST /api/v1/auth/login<br/>email + password]
     LoginReq --> FetchUser[Lookup user by email]
     FetchUser --> VerifyArgon[Verify password with Argon2id RFC 9106]
     VerifyArgon -- Failure --> Reject401[HTTP 401 Invalid Credentials]
@@ -805,7 +835,7 @@ sequenceDiagram
     participant Resend as Resend Email Gateway
 
     User->>Web: Clicks "Forgot Password" & Submits Email
-    Web->>API: POST /api/storefront/auth/forgot-password {email}
+    Web->>API: POST /api/v1/auth/forgot-password {email}
     API->>DB: Verify user exists and is active
     API->>DB: Generate secure random token & store SHA-256 hash (TTL: 15 mins)
     API->>Resend: Dispatch transactional email with reset link
@@ -813,7 +843,7 @@ sequenceDiagram
     API-->>Web: 200 OK (Generic success message prevents user enumeration)
 
     User->>Web: Opens link & submits new password
-    Web->>API: POST /api/storefront/auth/reset-password {token, new_password}
+    Web->>API: POST /api/v1/auth/reset-password {token, new_password}
     API->>DB: Query password_reset_tokens where token_hash matches, unexpired, unused
     API->>DB: Update user password_hash = Argon2id(new_password)
     API->>DB: Mark reset token as used (used_at = NOW())
@@ -856,7 +886,7 @@ sequenceDiagram
     participant DB as PostgreSQL
 
     Admin->>UI: Selects Order and clicks "Cancel & Refund"
-    UI->>API: POST /api/admin/orders/{id}/cancel {reason: "Customer Requested"}
+    UI->>API: POST /api/v1/admin/orders/{id}/refund {reason: "Customer Requested"}
     Note over API,DB: Transaction Begins
     API->>DB: Lock Order and associated Payment (FOR UPDATE)
     API->>DB: Validate order is in refundable state (PAID or RESERVED)
@@ -899,41 +929,50 @@ flowchart LR
 
 ### Task 02: API Surface Reference
 
-#### Storefront Endpoints (`/api/storefront`)
+#### Customer / Storefront Endpoints (`/api/v1`)
 | Method | Path | Auth Required | Description |
 | :--- | :--- | :--- | :--- |
-| `POST` | `/api/storefront/auth/register` | Public | Registers customer account and issues session cookie |
-| `POST` | `/api/storefront/auth/login` | Public | Verifies Argon2id credentials, sets cookie & returns CSRF |
-| `POST` | `/api/storefront/auth/logout` | Authenticated | Revokes session token in database |
-| `POST` | `/api/storefront/auth/forgot-password` | Public | Generates single-use reset token and emails via Resend |
-| `POST` | `/api/storefront/auth/reset-password` | Public | Validates token, updates password, revokes all sessions |
-| `GET` | `/api/storefront/products` | Public | Lists catalog with search, category & price filters |
-| `GET` | `/api/storefront/products/{slug}` | Public | Retrieves detailed product information |
-| `GET` | `/api/storefront/cart` | Authenticated | Returns customer active cart with current subtotals |
-| `POST` | `/api/storefront/cart/items` | Authenticated | Adds product item with stock limit checks |
-| `PATCH` | `/api/storefront/cart/items/{id}` | Authenticated | Updates quantity of existing cart item |
-| `DELETE` | `/api/storefront/cart/items/{id}` | Authenticated | Removes item from cart |
-| `POST` | `/api/storefront/checkout` | Authenticated | Locks inventory and creates 300s stock reservation |
-| `POST` | `/api/storefront/payments` | Authenticated | Idempotent payment processing with simulated gateway |
-| `GET` | `/api/storefront/orders` | Authenticated | Lists personal order history |
-| `GET` | `/api/storefront/orders/{id}` | Authenticated | Retrieves itemized receipt for specific order |
-| `GET` | `/api/storefront/profile` | Authenticated | Fetches customer profile information |
-| `PATCH` | `/api/storefront/profile` | Authenticated | Updates personal profile information |
-| `POST` | `/api/storefront/profile/avatar` | Authenticated | Uploads and associates avatar image |
+| `POST` | `/api/v1/auth/register` | Public | Registers customer account and issues session cookie |
+| `POST` | `/api/v1/auth/login` | Public | Verifies Argon2id credentials, sets cookie & returns CSRF |
+| `POST` | `/api/v1/auth/logout` | Authenticated | Revokes session token in database |
+| `GET` | `/api/v1/auth/csrf` | Authenticated | Retrieves active anti-CSRF synchronizer token |
+| `POST` | `/api/v1/auth/forgot-password` | Public | Generates single-use reset token and emails via Resend |
+| `POST` | `/api/v1/auth/reset-password` | Public | Validates token, updates password, revokes all sessions |
+| `GET` | `/api/v1/products` | Public | Lists catalog with search, category & price filters |
+| `GET` | `/api/v1/products/{slug}` | Public | Retrieves detailed product information |
+| `GET` | `/api/v1/cart` | Authenticated | Returns customer active cart with current subtotals |
+| `POST` | `/api/v1/cart/items` | Authenticated | Adds product item with stock limit checks |
+| `PATCH` | `/api/v1/cart/items/{id}` | Authenticated | Updates quantity of existing cart item |
+| `DELETE` | `/api/v1/cart/items/{id}` | Authenticated | Removes item from cart |
+| `DELETE` | `/api/v1/cart` | Authenticated | Empties all items from active cart |
+| `POST` | `/api/v1/checkout` | Authenticated | Locks inventory and creates 300s stock reservation |
+| `POST` | `/api/v1/payments` | Authenticated | Idempotent payment processing with simulated gateway |
+| `GET` | `/api/v1/orders` | Authenticated | Lists personal order history |
+| `GET` | `/api/v1/orders/{id}` | Authenticated | Retrieves itemized receipt for specific order |
+| `POST` | `/api/v1/orders/{id}/cancel` | Authenticated | Cancels unfulfilled order and releases reserved stock |
+| `GET` | `/api/v1/profile/me` | Authenticated | Fetches customer profile information |
+| `PATCH` | `/api/v1/profile/me` | Authenticated | Updates personal profile information |
+| `POST` | `/api/v1/profile/avatar` | Authenticated | Uploads and associates avatar image |
+| `POST` | `/api/v1/profile/change-password` | Authenticated | Updates password using Argon2id verification |
+| `POST` | `/api/v1/profile/change-email` | Authenticated | Updates customer email address |
+| `DELETE` | `/api/v1/profile/account` | Authenticated | Soft-deletes user account and revokes active sessions |
 
-#### Admin Endpoints (`/api/admin`)
+#### Admin Endpoints (`/api/v1/admin`)
 | Method | Path | Auth Required | Description |
 | :--- | :--- | :--- | :--- |
-| `GET` | `/api/admin/stats` | Admin | Aggregate dashboard KPIs (GMV, order counts, stock levels) |
-| `GET` | `/api/admin/users` | Admin | Paginated user management table with role filters |
-| `PATCH` | `/api/admin/users/{id}/role` | Admin | Updates user role (enforces safeguard checks) |
-| `DELETE` | `/api/admin/users/{id}` | Admin | Soft-deletes user (prevents self-deletion) |
-| `GET` | `/api/admin/products` | Admin | Lists complete product inventory including inactive items |
-| `POST` | `/api/admin/products` | Admin | Creates new product with auto-generated slug |
-| `PATCH` | `/api/admin/products/{id}` | Admin | Updates price, description, or stock with audit diff |
-| `GET` | `/api/admin/orders` | Admin | Lists all system orders with status filter |
-| `POST` | `/api/admin/orders/{id}/cancel` | Admin | Cancels order, releases reservations, issues refund |
-| `GET` | `/api/admin/audit-logs` | Admin | Lists chronological system audit records with JSONB diffs |
+| `GET` | `/api/v1/admin/stats` | Admin | Aggregate dashboard KPIs (GMV, order counts, stock levels) |
+| `GET` | `/api/v1/admin/users` | Admin | Paginated user management table with role filters |
+| `PATCH` | `/api/v1/admin/users/{id}/role` | Admin | Updates user role (enforces safeguard checks) |
+| `PATCH` | `/api/v1/admin/users/{id}/status` | Admin | Activates or deactivates user account |
+| `POST` | `/api/v1/admin/users/{id}/reset-password` | Admin | Generates administrative password reset |
+| `DELETE` | `/api/v1/admin/users/{id}` | Admin | Soft-deletes user (prevents self-deletion) |
+| `GET` | `/api/v1/admin/products` | Admin | Lists complete product inventory including inactive items |
+| `POST` | `/api/v1/admin/products` | Admin | Creates new product with auto-generated slug |
+| `PATCH` | `/api/v1/admin/products/{id}` | Admin | Updates price, description, or stock with audit diff |
+| `DELETE` | `/api/v1/admin/products/{id}` | Admin | Soft-deletes / deactivates product |
+| `GET` | `/api/v1/admin/orders` | Admin | Lists all system orders with status filter |
+| `POST` | `/api/v1/admin/orders/{id}/refund` | Admin | Cancels order, releases reservations, issues refund |
+| `GET` | `/api/v1/admin/audit-logs` | Admin | Lists chronological system audit records with JSONB diffs |
 
 ---
 
@@ -1036,16 +1075,16 @@ graph LR
 | **Reservation Expiry Worker** | 01 | `task-01/app/services/expiry.py` | Background task runs every 5s with `SKIP LOCKED` |
 | **Payment Success/Failure/Timeout** | 01 | `task-01/app/services/payment.py` | Simulated outcomes in payment service tests |
 | **Duplicate Payment Protection** | 01 | `task-01/app/services/payment.py` | Unique key checks in `test_security.py` |
-| **Product Discovery & Search** | 02 | `task-02/backend/app/api/storefront/products.py` | Tested in `test_catalog_and_cart.py` |
-| **Persistent Cart Management** | 02 | `task-02/backend/app/api/storefront/cart.py` | Tested in `test_catalog_and_cart.py` |
-| **Deterministic Checkout Locks** | 02 | `task-02/backend/app/services/checkout_service.py` | Tested in `test_checkout_concurrency.py` |
-| **Automated Sweeper Service** | 02 | `task-02/backend/app/services/sweeper_service.py` | Tested in `test_reservation_expiry.py` |
-| **Payment Idempotency Table** | 02 | `task-02/backend/app/services/payment_service.py` | Tested in `test_payment_idempotency.py` |
-| **Argon2id & CSRF Security** | 02 | `task-02/backend/app/core/security.py` | Tested in `test_session_auth_and_csrf.py` |
-| **Admin RBAC & Safeguards** | 02 | `task-02/backend/app/api/admin/users.py` | Tested in `test_admin_rbac_and_safeguards.py` |
-| **Order Cancellation & Refund** | 02 | `task-02/backend/app/api/admin/orders.py` | Tested in `test_order_cancellation_and_refund.py` |
-| **JSONB Audit Logging** | 02 | `task-02/backend/app/services/audit_service.py` | Tested in `test_audit_identity.py` |
-| **Resend Password Recovery** | 02 | `task-02/backend/app/services/resend_service.py` | Tested in `test_resend_email.py` |
+| **Product Discovery & Search** | 02 | `task-02/backend/app/api/v1/products.py` | Tested in `tests/integration/test_catalog_and_cart.py` |
+| **Persistent Cart Management** | 02 | `task-02/backend/app/api/v1/cart.py` | Tested in `tests/integration/test_catalog_and_cart.py` |
+| **Deterministic Checkout Locks** | 02 | `task-02/backend/app/services/checkout_service.py` | Tested in `tests/integration/test_checkout_concurrency.py` |
+| **Automated Sweeper Service** | 02 | `task-02/backend/app/services/sweeper_service.py` | Tested in `tests/integration/test_reservation_expiry.py` |
+| **Payment Idempotency Table** | 02 | `task-02/backend/app/services/payment_service.py` | Tested in `tests/integration/test_payment_idempotency.py` |
+| **Argon2id & CSRF Security** | 02 | `task-02/backend/app/core/security.py` | Tested in `tests/integration/test_session_auth_and_csrf.py` |
+| **Admin RBAC & Safeguards** | 02 | `task-02/backend/app/api/v1/admin/users.py` | Tested in `tests/integration/test_admin_rbac_and_safeguards.py` |
+| **Order Cancellation & Refund** | 02 | `task-02/backend/app/api/v1/admin/orders.py` | Tested in `tests/integration/test_order_cancellation_and_refund.py` |
+| **JSONB Audit Logging** | 02 | `task-02/backend/app/services/audit_service.py` | Tested in `tests/integration/test_audit_identity.py` |
+| **Resend Password Recovery** | 02 | `task-02/backend/app/services/email_service.py` | Tested in `tests/unit/test_resend_email.py` |
 
 ---
 
@@ -1065,27 +1104,27 @@ platform win32 -- Python 3.10.11, pytest-8.3.4, pluggy-1.5.0
 rootdir: /workspace/pos-ecommerce-systems/task-02
 collected 21 items
 
-backend/tests/test_admin_rbac_and_safeguards.py::test_admin_can_list_users PASSED
-backend/tests/test_admin_rbac_and_safeguards.py::test_customer_cannot_access_admin PASSED
-backend/tests/test_admin_rbac_and_safeguards.py::test_admin_cannot_delete_self PASSED
-backend/tests/test_argon2_password.py::test_argon2_hashing_and_verification PASSED
-backend/tests/test_audit_identity.py::test_audit_log_captures_actor_and_diff PASSED
-backend/tests/test_catalog_and_cart.py::test_catalog_browsing_and_filtering PASSED
-backend/tests/test_catalog_and_cart.py::test_cart_lifecycle_and_quantity_caps PASSED
-backend/tests/test_checkout_concurrency.py::test_concurrent_checkout_stock_reservation PASSED
-backend/tests/test_money_calculations.py::test_monetary_exactness_and_decimal_rounding PASSED
-backend/tests/test_order_cancellation_and_refund.py::test_order_cancellation_restores_stock PASSED
-backend/tests/test_payment_idempotency.py::test_payment_idempotency_same_payload PASSED
-backend/tests/test_payment_idempotency.py::test_payment_idempotency_mismatched_payload PASSED
-backend/tests/test_payment_idempotency.py::test_payment_timeout_state_transition PASSED
-backend/tests/test_profile_and_avatar.py::test_profile_update_and_avatar_upload PASSED
-backend/tests/test_resend_email.py::test_password_reset_token_issuance_and_consumption PASSED
-backend/tests/test_reservation_expiry.py::test_sweeper_restores_expired_reservation_stock PASSED
-backend/tests/test_session_auth_and_csrf.py::test_session_cookie_issuance_and_invalidation PASSED
-backend/tests/test_session_auth_and_csrf.py::test_csrf_token_enforcement_on_mutating_requests PASSED
-backend/tests/test_session_auth_and_csrf.py::test_unauthenticated_requests_blocked PASSED
-backend/tests/test_session_auth_and_csrf.py::test_soft_deleted_user_session_revocation PASSED
-backend/tests/test_session_auth_and_csrf.py::test_session_expiry_handling PASSED
+backend/tests/integration/test_admin_rbac_and_safeguards.py::test_admin_can_list_users PASSED
+backend/tests/integration/test_admin_rbac_and_safeguards.py::test_customer_cannot_access_admin PASSED
+backend/tests/integration/test_admin_rbac_and_safeguards.py::test_admin_cannot_delete_self PASSED
+backend/tests/unit/test_argon2_password.py::test_argon2_hashing_and_verification PASSED
+backend/tests/integration/test_audit_identity.py::test_audit_log_captures_actor_and_diff PASSED
+backend/tests/integration/test_catalog_and_cart.py::test_catalog_browsing_and_filtering PASSED
+backend/tests/integration/test_catalog_and_cart.py::test_cart_lifecycle_and_quantity_caps PASSED
+backend/tests/integration/test_checkout_concurrency.py::test_concurrent_checkout_stock_reservation PASSED
+backend/tests/unit/test_money_calculations.py::test_monetary_exactness_and_decimal_rounding PASSED
+backend/tests/integration/test_order_cancellation_and_refund.py::test_order_cancellation_restores_stock PASSED
+backend/tests/integration/test_payment_idempotency.py::test_payment_idempotency_same_payload PASSED
+backend/tests/integration/test_payment_idempotency.py::test_payment_idempotency_mismatched_payload PASSED
+backend/tests/integration/test_payment_idempotency.py::test_payment_timeout_state_transition PASSED
+backend/tests/integration/test_profile_and_avatar.py::test_profile_update_and_avatar_upload PASSED
+backend/tests/unit/test_resend_email.py::test_password_reset_token_issuance_and_consumption PASSED
+backend/tests/integration/test_reservation_expiry.py::test_sweeper_restores_expired_reservation_stock PASSED
+backend/tests/integration/test_session_auth_and_csrf.py::test_session_cookie_issuance_and_invalidation PASSED
+backend/tests/integration/test_session_auth_and_csrf.py::test_csrf_token_enforcement_on_mutating_requests PASSED
+backend/tests/integration/test_session_auth_and_csrf.py::test_unauthenticated_requests_blocked PASSED
+backend/tests/integration/test_session_auth_and_csrf.py::test_soft_deleted_user_session_revocation PASSED
+backend/tests/integration/test_session_auth_and_csrf.py::test_session_expiry_handling PASSED
 
 ======================== 21 passed, 2 warnings in 3.16s ========================
 ```
@@ -1185,11 +1224,12 @@ SEED_DEMO_USERS=true
 COOKIE_SAMESITE=lax
 ```
 
-#### 3. Install Backend Dependencies & Start Server
+#### 3. Install Backend Dependencies, Apply Migrations & Start Server
 ```bash
 python -m venv .venv
 source .venv/bin/activate  # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
+alembic upgrade head
 uvicorn app.main:app --reload --port 8000
 ```
 
